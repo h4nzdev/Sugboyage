@@ -1,8 +1,10 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { Feather } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 export default function MainHeader() {
+  const navigation = useNavigation();
   return (
     <View className="px-5 pt-3 pb-4">
       <View className="flex-row justify-between items-center mb-1">
@@ -16,7 +18,10 @@ export default function MainHeader() {
           <TouchableOpacity className="bg-gray-100 p-2 rounded-xl">
             <Feather name="search" size={20} color="#374151" />
           </TouchableOpacity>
-          <TouchableOpacity className="bg-gray-100 p-2 rounded-xl">
+          <TouchableOpacity
+            onPress={() => navigation.navigate("profile")}
+            className="bg-gray-100 p-2 rounded-xl"
+          >
             <Feather name="user" size={20} color="#374151" />
           </TouchableOpacity>
         </View>

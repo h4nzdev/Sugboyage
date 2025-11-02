@@ -1,9 +1,11 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context"; // ← ADD THIS
 
 function BottomNavbar({ state, navigation }) {
-  // Get active tab from navigation state
+  const insets = useSafeAreaInsets(); // ← ADD THIS
+
   const activeTab = state.routes[state.index].name;
 
   const tabs = [
@@ -27,9 +29,13 @@ function BottomNavbar({ state, navigation }) {
   };
 
   return (
-    <View className="flex-row bg-white border-t border-slate-200 px-2 py-3">
+    <View
+      className="flex-row bg-white border-t border-slate-200 px-2 py-3"
+      style={{ paddingBottom: insets.bottom }}
+    >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
+        const isAITab = tab.id === "ai";
 
         return (
           <TouchableOpacity
@@ -37,15 +43,35 @@ function BottomNavbar({ state, navigation }) {
             onPress={() => handleTabPress(tab.id)}
             className="flex-1 items-center justify-center"
           >
-            <Feather
-              name={tab.icon}
-              size={24}
-              color={isActive ? "#0f766e" : "#64748b"}
-            />
+            <View
+              className={`items-center justify-center rounded-full ${
+                isAITab
+                  ? !isActive
+                    ? "bg-teal-600 w-12 h-12 rounded-full"
+                    : ""
+                  : isActive
+                    ? "bg-teal-50 w-10 h-10"
+                    : "w-10 h-10"
+              }`}
+            >
+              <Feather
+                name={tab.icon}
+                size={isAITab ? 26 : 24}
+                color={
+                  isAITab
+                    ? !isActive
+                      ? "#ffff"
+                      : ""
+                    : isActive
+                      ? "#0f766e"
+                      : "#64748b"
+                }
+              />
+            </View>
             <Text
               className={`text-xs mt-1 ${
                 isActive ? "text-teal-700 font-semibold" : "text-slate-500"
-              }`}
+              } ${isAITab ? "font-bold" : ""}`}
             >
               {tab.label}
             </Text>

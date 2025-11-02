@@ -4,15 +4,29 @@ import {
   ScrollView,
   TouchableOpacity,
   TextInput,
+  Dimensions,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MainHeader from "../../../components/Header/MainHeader";
+import { useNavigation } from "@react-navigation/native";
+import { SafeAreaWrapper } from "../../../components/Layout/SafeAreWrapper";
+import { CebuSpotsService } from "../../../services/cebuSpotService";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function Discover() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [destinations, setDestinations] = useState([]);
+  const [featuredSpots, setFeaturedSpots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const navigation = useNavigation();
 
   const categories = [
     { id: "all", name: "All", icon: "grid" },
@@ -23,101 +37,237 @@ export default function Discover() {
     { id: "food", name: "Food", icon: "coffee" },
   ];
 
-  const destinations = [
-    {
-      id: 1,
-      name: "Kawasan Falls Adventure",
-      location: "Badian, Cebu",
-      days: "Full Day",
-      type: "Waterfall",
-      distance: "2.5 hrs away",
-      rating: 4.9,
-      category: "adventure",
-      color: "#10B981",
-      price: "₱500",
-      featured: true,
-      geofence: true,
-    },
-    {
-      id: 2,
-      name: "Bantayan Island Escape",
-      location: "Bantayan Island",
-      days: "2-3 Days",
-      type: "Beach Paradise",
-      distance: "4 hrs away",
-      rating: 4.8,
-      category: "beaches",
-      color: "#06B6D4",
-      price: "₱1,200",
-      featured: false,
-      geofence: true,
-    },
-    {
-      id: 3,
-      name: "Temple of Leah",
-      location: "Cebu City",
-      days: "Half Day",
-      type: "Historical Landmark",
-      distance: "20 min away",
-      rating: 4.7,
-      category: "historical",
-      color: "#8B5CF6",
-      price: "₱100",
-      featured: true,
-      geofence: true,
-    },
-    {
-      id: 4,
-      name: "Sirao Flower Farm",
-      location: "Cebu City",
-      days: "Half Day",
-      type: "Scenic Garden",
-      distance: "45 min away",
-      rating: 4.6,
-      category: "cultural",
-      color: "#EC4899",
-      price: "₱150",
-      featured: false,
-      geofence: true,
-    },
-    {
-      id: 5,
-      name: "Magellan's Cross",
-      location: "Downtown Cebu",
-      days: "1-2 Hours",
-      type: "Cultural Heritage",
-      distance: "15 min away",
-      rating: 4.5,
-      category: "cultural",
-      color: "#F59E0B",
-      price: "Free",
-      featured: true,
-      geofence: true,
-    },
-    {
-      id: 6,
-      name: "Osmeña Peak Hike",
-      location: "Dalaguete, Cebu",
-      days: "Full Day",
-      type: "Mountain Adventure",
-      distance: "3 hrs away",
-      rating: 4.8,
-      category: "adventure",
-      color: "#F97316",
-      price: "₱300",
-      featured: false,
-      geofence: false,
-    },
-  ];
+  // Load destinations based on category
+  useEffect(() => {
+    loadDestinations();
+  }, [activeCategory]);
 
-  const filteredDestinations =
-    activeCategory === "all"
-      ? destinations
-      : destinations.filter((dest) => dest.category === activeCategory);
+  const loadDestinations = async () => {
+    try {
+      setLoading(true);
+      let spots;
+
+      if (activeCategory === "all") {
+        spots = await CebuSpotsService.searchSpots("");
+      } else {
+        spots = await CebuSpotsService.searchByCategory(activeCategory);
+      }
+
+      setDestinations(spots);
+
+      // Extract featured spots for horizontal scroll
+      const featured = spots.filter((spot) => spot.featured).slice(0, 4);
+      setFeaturedSpots(featured);
+    } catch (error) {
+      console.error("Error loading destinations:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadDestinations();
+    setRefreshing(false);
+  };
+
+  const handleSearch = async () => {
+    if (searchQuery.trim()) {
+      setLoading(true);
+      const spots = await CebuSpotsService.searchSpots(searchQuery);
+      setDestinations(spots);
+      setFeaturedSpots([]); // Clear featured when searching
+      setLoading(false);
+    }
+  };
+
+  const handleCategoryChange = (categoryId) => {
+    setActiveCategory(categoryId);
+  };
+
+  const filteredDestinations = destinations.filter((dest) =>
+    dest.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Enhanced Grid Card Component
+  const GridCard = ({ destination }) => (
+    <TouchableOpacity
+      className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm mb-4"
+      style={{ width: (screenWidth - 40) / 2 - 8 }} // 2 columns with gap
+      onPress={() =>
+        navigation.navigate("detailed-info", { spot: destination })
+      }
+    >
+      {/* Image/Color Section */}
+      <View
+        className="h-32 relative"
+        style={{ backgroundColor: destination.color }}
+      >
+        {/* Featured Badge */}
+        {destination.featured && (
+          <View className="absolute top-2 left-2 bg-amber-500 px-2 py-1 rounded-full">
+            <Text className="text-white text-xs font-black">FEATURED</Text>
+          </View>
+        )}
+
+        {/* Geofence Indicator */}
+        {destination.geofence && (
+          <View className="absolute top-2 right-2 bg-emerald-500 w-6 h-6 rounded-full items-center justify-center">
+            <Feather name="map-pin" size={12} color="#FFFFFF" />
+          </View>
+        )}
+
+        {/* Price Tag */}
+        <View className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded-full">
+          <Text className="text-white text-xs font-bold">
+            {destination.price}
+          </Text>
+        </View>
+      </View>
+
+      {/* Content Section */}
+      <View className="p-3">
+        <Text
+          className="text-gray-900 font-bold text-sm mb-1"
+          numberOfLines={2}
+        >
+          {destination.name}
+        </Text>
+
+        <View className="flex-row items-center mb-2">
+          <Feather name="map-pin" size={10} color="#6B7280" />
+          <Text className="text-gray-600 text-xs ml-1 flex-1" numberOfLines={1}>
+            {destination.location}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <Feather name="star" size={12} color="#F59E0B" />
+            <Text className="text-gray-700 text-xs font-bold ml-1">
+              {destination.rating}
+            </Text>
+          </View>
+
+          <View className="flex-row items-center">
+            <Feather name="clock" size={10} color="#6B7280" />
+            <Text className="text-gray-600 text-xs ml-1">
+              {destination.distance.split(" ")[0]}
+            </Text>
+          </View>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+
+  // Horizontal Featured Card Component
+  const HorizontalCard = ({ destination }) => (
+    <TouchableOpacity
+      className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
+      style={{ width: screenWidth * 0.75 }}
+      onPress={() =>
+        navigation.navigate("detailed-info", { spot: destination })
+      }
+    >
+      {/* Image/Color Section */}
+      <View
+        className="h-40 relative"
+        style={{ backgroundColor: destination.color }}
+      >
+        {/* Featured Badge */}
+        {destination.featured && (
+          <View className="absolute top-3 left-3 bg-amber-500 px-3 py-1.5 rounded-full">
+            <Text className="text-white text-xs font-black">FEATURED</Text>
+          </View>
+        )}
+
+        {/* Geofence Indicator */}
+        {destination.geofence && (
+          <View className="absolute top-3 right-3 bg-emerald-500 w-8 h-8 rounded-full items-center justify-center">
+            <Feather name="map-pin" size={14} color="#FFFFFF" />
+          </View>
+        )}
+
+        {/* Price Tag */}
+        <View className="absolute bottom-3 right-3 bg-black/80 px-3 py-1.5 rounded-full">
+          <Text className="text-white text-sm font-bold">
+            {destination.price}
+          </Text>
+        </View>
+
+        {/* Type Badge */}
+        <View className="absolute bottom-3 left-3 bg-white/90 px-3 py-1.5 rounded-full">
+          <Text className="text-gray-900 text-xs font-bold">
+            {destination.type}
+          </Text>
+        </View>
+      </View>
+
+      {/* Content Section */}
+      <View className="p-4">
+        <Text
+          className="text-gray-900 font-bold text-lg mb-2"
+          numberOfLines={2}
+        >
+          {destination.name}
+        </Text>
+
+        <View className="flex-row items-center mb-3">
+          <Feather name="map-pin" size={14} color="#6B7280" />
+          <Text className="text-gray-600 text-sm ml-2 flex-1" numberOfLines={1}>
+            {destination.location}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-row items-center">
+            <Feather name="star" size={14} color="#F59E0B" />
+            <Text className="text-gray-700 text-sm font-bold ml-1">
+              {destination.rating}
+            </Text>
+            <Text className="text-gray-500 text-sm ml-1">
+              ({destination.reviews})
+            </Text>
+          </View>
+
+          <View className="flex-row items-center">
+            <Feather name="clock" size={12} color="#6B7280" />
+            <Text className="text-gray-600 text-sm ml-1">
+              {destination.distance}
+            </Text>
+          </View>
+        </View>
+
+        {/* Quick Actions */}
+        <View className="flex-row" style={{ gap: 8 }}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("detailed-info", { spot: destination })
+            }
+            className="bg-emerald-500 flex-1 py-3 rounded-xl"
+          >
+            <Text className="text-white text-sm font-bold text-center">
+              View Details
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity className="w-12 h-12 bg-gray-100 rounded-xl items-center justify-center">
+            <Feather name="heart" size={18} color="#6B7280" />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+    <SafeAreaWrapper className="flex-1 bg-white">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Search & Filter Section */}
         <View className="px-5 pt-3 pb-4">
           {/* Search Bar */}
@@ -128,7 +278,9 @@ export default function Discover() {
               className="flex-1 ml-3 text-gray-900"
               value={searchQuery}
               onChangeText={setSearchQuery}
+              onSubmitEditing={handleSearch}
               placeholderTextColor="#9CA3AF"
+              returnKeyType="search"
             />
             {searchQuery.length > 0 && (
               <TouchableOpacity onPress={() => setSearchQuery("")}>
@@ -169,7 +321,7 @@ export default function Discover() {
             {categories.map((category) => (
               <TouchableOpacity
                 key={category.id}
-                onPress={() => setActiveCategory(category.id)}
+                onPress={() => handleCategoryChange(category.id)}
                 className={`px-4 py-3 rounded-2xl flex-row items-center ${
                   activeCategory === category.id
                     ? "bg-emerald-500"
@@ -206,10 +358,15 @@ export default function Discover() {
                     " Spots"}
               </Text>
               <Text className="text-gray-500 text-sm">
-                {filteredDestinations.length} amazing places found
+                {loading
+                  ? "Loading..."
+                  : `${filteredDestinations.length} amazing places found`}
               </Text>
             </View>
-            <TouchableOpacity className="flex-row items-center bg-gray-100 px-3 py-2 rounded-full">
+            <TouchableOpacity
+              onPress={() => navigation.navigate("map")}
+              className="flex-row items-center bg-gray-100 px-3 py-2 rounded-full"
+            >
               <Feather name="map" size={14} color="#374151" />
               <Text className="text-gray-700 text-sm ml-2 font-medium">
                 View Map
@@ -218,92 +375,68 @@ export default function Discover() {
           </View>
         </View>
 
-        {/* Destination Cards Grid */}
-        <View className="px-5">
-          <View className="flex-row flex-wrap justify-between">
-            {filteredDestinations.map((destination) => (
-              <TouchableOpacity
-                key={destination.id}
-                className="w-[48%] bg-white rounded-2xl mb-4 overflow-hidden border border-gray-200 shadow-sm"
-              >
-                {/* Image/Color Section */}
-                <View
-                  className="h-32 relative"
-                  style={{ backgroundColor: destination.color }}
-                >
-                  {/* Featured Badge */}
-                  {destination.featured && (
-                    <View className="absolute top-2 left-2 bg-amber-500 px-2 py-1 rounded-full">
-                      <Text className="text-white text-xs font-black">
-                        FEATURED
-                      </Text>
-                    </View>
-                  )}
-
-                  {/* Geofence Indicator */}
-                  {destination.geofence && (
-                    <View className="absolute top-2 right-2 bg-emerald-500 w-6 h-6 rounded-full items-center justify-center">
-                      <Feather name="map-pin" size={12} color="#FFFFFF" />
-                    </View>
-                  )}
-
-                  {/* Price Tag */}
-                  <View className="absolute bottom-2 right-2 bg-black/80 px-2 py-1 rounded-full">
-                    <Text className="text-white text-xs font-bold">
-                      {destination.price}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Content Section */}
-                <View className="p-3">
-                  <Text
-                    className="text-gray-900 font-bold text-sm mb-1"
-                    numberOfLines={2}
-                  >
-                    {destination.name}
-                  </Text>
-
-                  <View className="flex-row items-center mb-2">
-                    <Feather name="map-pin" size={10} color="#6B7280" />
-                    <Text
-                      className="text-gray-600 text-xs ml-1 flex-1"
-                      numberOfLines={1}
-                    >
-                      {destination.location}
-                    </Text>
-                  </View>
-
-                  <View className="flex-row items-center justify-between">
-                    <View className="flex-row items-center">
-                      <Feather name="star" size={12} color="#F59E0B" />
-                      <Text className="text-gray-700 text-xs font-bold ml-1">
-                        {destination.rating}
-                      </Text>
-                    </View>
-
-                    <View className="flex-row items-center">
-                      <Feather name="clock" size={10} color="#6B7280" />
-                      <Text className="text-gray-600 text-xs ml-1">
-                        {destination.distance}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Quick Action */}
-                  <TouchableOpacity className="bg-emerald-50 mt-2 py-1 rounded-lg">
-                    <Text className="text-emerald-700 text-xs font-bold text-center">
-                      VIEW DETAILS
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            ))}
+        {/* Loading State */}
+        {loading && (
+          <View className="py-10">
+            <ActivityIndicator size="large" color="#059669" />
+            <Text className="text-center text-gray-500 mt-3">
+              Discovering amazing Cebu spots...
+            </Text>
           </View>
-        </View>
+        )}
 
-        {/* Local Tips Section */}
-        <View className="px-5 mt-4 mb-6">
+        {/* Featured Spots - Horizontal Scroll (Only show if we have featured spots and not searching) */}
+        {!loading && featuredSpots.length > 0 && !searchQuery && (
+          <View className="mb-6">
+            <View className="px-5 mb-3">
+              <Text className="text-lg font-black text-gray-900">
+                Featured Spots
+              </Text>
+              <Text className="text-gray-500 text-sm">
+                Must-visit destinations in Cebu
+              </Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 20, gap: 16 }}
+            >
+              {featuredSpots.map((destination) => (
+                <HorizontalCard
+                  key={destination.id}
+                  destination={destination}
+                />
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* All Spots - Grid Layout */}
+        {!loading && filteredDestinations.length > 0 && (
+          <View className="px-5 mb-6">
+            <View className="flex-row flex-wrap justify-between">
+              {filteredDestinations.map((destination) => (
+                <GridCard key={destination.id} destination={destination} />
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* No Results State */}
+        {!loading && filteredDestinations.length === 0 && (
+          <View className="px-5 py-10 items-center">
+            <Feather name="search" size={48} color="#9CA3AF" />
+            <Text className="text-gray-500 text-lg mt-3 text-center">
+              No destinations found
+            </Text>
+            <Text className="text-gray-400 text-sm mt-1 text-center">
+              Try a different search or category
+            </Text>
+          </View>
+        )}
+
+        {/* Rest of your components remain the same */}
+        <View className="px-5 mt-2 mb-6">
           <View className="bg-white rounded-2xl p-5 border-2 border-blue-200 shadow-sm">
             <View className="flex-row items-start">
               <View className="bg-blue-100 p-3 rounded-2xl mr-3">
@@ -351,6 +484,6 @@ export default function Discover() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaWrapper>
   );
 }

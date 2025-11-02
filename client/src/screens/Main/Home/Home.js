@@ -1,9 +1,16 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ImageBackground,
+} from "react-native";
 import React from "react";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MapView, { Marker, Circle } from "react-native-maps";
 import MainHeader from "../../../components/Header/MainHeader";
+import { SafeAreaWrapper } from "../../../components/Layout/SafeAreWrapper";
 
 export default function Home() {
   // Cebu-specific locations for geofencing
@@ -16,6 +23,8 @@ export default function Home() {
       type: "historical",
       distance: "15 min",
       rating: 4.8,
+      image:
+        "https://w5x6j5c9.delivery.rocketcdn.me/wp-content/uploads/2024/06/temple-of-leah-building-front.jpg",
     },
     {
       id: 2,
@@ -25,6 +34,8 @@ export default function Home() {
       type: "cultural",
       distance: "20 min",
       rating: 4.5,
+      image:
+        "https://w5x6j5c9.delivery.rocketcdn.me/wp-content/uploads/2024/03/magellan-cross-cebu-1024x768.jpg",
     },
     {
       id: 3,
@@ -34,6 +45,8 @@ export default function Home() {
       type: "adventure",
       distance: "2.5 hrs",
       rating: 4.9,
+      image:
+        "https://i0.wp.com/kawasanfalls.net/wp-content/uploads/2011/04/kawasan-falls-pana-4.jpg?w=1000&ssl=1",
     },
   ];
 
@@ -46,58 +59,245 @@ export default function Home() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaWrapper className="flex-1 bg-white">
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-        {/* Clean Header - SugVoyage Branded */}
+        {/* Clean Header */}
         <MainHeader />
-        {/* Quick Access - Travel Focused */}
+
+        {/* Hero Search Card */}
         <View className="px-5 mb-5">
+          <View className="bg-white rounded-2xl p-5 border border-gray-200 shadow-sm relative overflow-hidden">
+            {/* Background Pattern */}
+            <View className="absolute top-0 right-0 w-24 h-24 bg-emerald-100 rounded-full -mr-6 -mt-6 opacity-50" />
+            <View className="absolute bottom-0 left-0 w-16 h-16 bg-amber-100 rounded-full -ml-4 -mb-4 opacity-50" />
+
+            <View className="relative z-10">
+              {/* Header */}
+              <View className="flex-row items-start justify-between mb-4">
+                <View className="flex-1">
+                  <Text className="text-gray-900 font-black text-2xl mb-1">
+                    Your Cebu Adventure Awaits!
+                  </Text>
+                  <Text className="text-gray-500 text-sm">
+                    {new Date().toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </Text>
+                </View>
+                <View className="bg-emerald-500 p-2 rounded-xl">
+                  <Feather name="sun" size={20} color="#FFFFFF" />
+                </View>
+              </View>
+
+              {/* Weather & Conditions */}
+              <View className="flex-row items-center bg-blue-50 rounded-xl p-3 mb-4">
+                <Feather name="cloud" size={16} color="#3B82F6" />
+                <Text className="text-blue-700 text-sm ml-2 flex-1">
+                  Perfect day for beaches & waterfalls ☀️
+                </Text>
+                <Text className="text-blue-600 text-xs font-bold">28°C</Text>
+              </View>
+
+              {/* Quick Start Buttons */}
+              <View className="flex-row" style={{ gap: 8 }}>
+                <TouchableOpacity className="flex-1 bg-emerald-500 rounded-xl p-3 flex-row items-center justify-center">
+                  <Feather name="compass" size={16} color="#FFFFFF" />
+                  <Text className="text-white font-bold text-sm ml-2">
+                    Start Exploring
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity className="w-12 h-12 bg-gray-100 rounded-xl items-center justify-center">
+                  <Feather name="zap" size={18} color="#6B7280" />
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* Must-Visit Cards - MOVED UP! */}
+        <View className="px-5 mb-5">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-black text-gray-900">
+              Must-Visit in Cebu
+            </Text>
+            <TouchableOpacity>
+              <Text className="text-emerald-600 font-semibold text-sm">
+                See all
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 16 }}
+            contentContainerStyle={{ gap: 12 }}
           >
-            {[
-              { icon: "map-pin", name: "Near Me", color: "#EF4444" },
-              { icon: "camera", name: "Scan Place", color: "#8B5CF6" },
-              { icon: "compass", name: "Discover", color: "#10B981" },
-              { icon: "message-circle", name: "AI Guide", color: "#F59E0B" },
-              { icon: "calendar", name: "Plan Trip", color: "#3B82F6" },
-            ].map((item, index) => (
-              <TouchableOpacity key={index} className="items-center">
-                <View
-                  className="w-14 h-14 rounded-2xl items-center justify-center mb-2 border border-gray-200"
-                  style={{ backgroundColor: item.color + "08" }}
+            {popularSpots.map((spot) => (
+              <TouchableOpacity
+                key={spot.id}
+                className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
+                style={{ width: 280 }}
+              >
+                <ImageBackground
+                  source={{ uri: spot.image }}
+                  resizeMode="cover"
+                  className="h-40 rounded-xl overflow-hidden relative"
                 >
-                  <Feather name={item.icon} size={24} color={item.color} />
+                  {/* Top right: distance */}
+                  <View className="absolute top-3 right-3 bg-white px-3 py-1.5 rounded-full shadow-lg flex-row items-center">
+                    <Feather name="clock" size={12} color="#6B7280" />
+                    <Text className="text-gray-900 font-bold text-xs ml-1">
+                      {spot.distance}
+                    </Text>
+                  </View>
+
+                  {/* Top left: type */}
+                  <View className="absolute top-3 left-3 bg-white px-3 py-1.5 rounded-full">
+                    <Text className="text-gray-900 font-bold text-xs">
+                      {spot.type.toUpperCase()}
+                    </Text>
+                  </View>
+
+                  {/* Bottom section: rating and heart */}
+                  <View className="absolute bottom-3 left-3 right-3 flex-row items-center justify-between">
+                    <View className="bg-white px-3 py-1.5 rounded-full flex-row items-center">
+                      <Feather name="star" size={12} color="#F59E0B" />
+                      <Text className="text-gray-900 font-bold text-xs ml-1">
+                        {spot.rating}
+                      </Text>
+                    </View>
+
+                    <View className="bg-white p-2 rounded-full">
+                      <Feather name="heart" size={16} color="#EF4444" />
+                    </View>
+                  </View>
+                </ImageBackground>
+                <View className="p-4">
+                  <Text className="text-gray-900 font-black text-lg mb-1">
+                    {spot.name}
+                  </Text>
+                  <View className="flex-row items-center">
+                    <Feather name="map-pin" size={12} color="#6B7280" />
+                    <Text className="text-gray-600 text-sm ml-1">
+                      {spot.type.charAt(0).toUpperCase() + spot.type.slice(1)}{" "}
+                      Destination
+                    </Text>
+                  </View>
                 </View>
-                <Text className="text-gray-900 text-xs font-semibold">
-                  {item.name}
-                </Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
 
-        {/* Travel Assistant Card */}
+        {/* Quick Access Grid */}
+        <View className="px-5 mb-5">
+          <View className="flex-row flex-wrap" style={{ gap: 12 }}>
+            {[
+              { icon: "map-pin", name: "Near Me", color: "#EF4444" },
+              { icon: "camera", name: "Scan Place", color: "#8B5CF6" },
+              { icon: "compass", name: "Discover", color: "#10B981" },
+              { icon: "message-circle", name: "AI Guide", color: "#F59E0B" },
+            ].map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                className="bg-white rounded-2xl p-4 border border-gray-200 items-center justify-center"
+                style={{ width: "48%" }}
+              >
+                <View
+                  className="w-12 h-12 rounded-xl items-center justify-center mb-2"
+                  style={{ backgroundColor: item.color + "15" }}
+                >
+                  <Feather name={item.icon} size={22} color={item.color} />
+                </View>
+                <Text className="text-gray-900 text-sm font-semibold">
+                  {item.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Interactive Map Section */}
+        <View className="px-5 mb-5">
+          <View className="flex-row justify-between items-center mb-3">
+            <Text className="text-lg font-black text-gray-900">
+              Nearby Locations
+            </Text>
+            <View className="flex-row items-center bg-emerald-100 px-3 py-1 rounded-full">
+              <View className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></View>
+              <Text className="text-emerald-700 text-xs font-bold">LIVE</Text>
+            </View>
+          </View>
+
+          <View className="bg-white rounded-2xl overflow-hidden border border-gray-200">
+            <View className="h-72">
+              <MapView
+                style={{ flex: 1 }}
+                initialRegion={userLocation}
+                showsUserLocation={true}
+                className="rounded-2xl"
+              >
+                {/* Geofence circle */}
+                <Circle
+                  center={userLocation}
+                  radius={1000}
+                  strokeWidth={2}
+                  strokeColor="#059669"
+                  fillColor="rgba(5, 150, 105, 0.1)"
+                />
+
+                {/* Cebu spots markers */}
+                {popularSpots.map((spot) => (
+                  <Marker
+                    key={spot.id}
+                    coordinate={{
+                      latitude: spot.latitude,
+                      longitude: spot.longitude,
+                    }}
+                    title={spot.name}
+                  >
+                    <View className="bg-emerald-500 w-6 h-6 rounded-full border-2 border-white items-center justify-center shadow-lg">
+                      <Feather name="map-pin" size={12} color="#fff" />
+                    </View>
+                  </Marker>
+                ))}
+              </MapView>
+            </View>
+
+            <View className="p-4 border-t border-gray-100">
+              <View className="flex-row justify-between items-center">
+                <Text className="text-gray-900 font-semibold">
+                  Geofencing Active
+                </Text>
+                <Text className="text-emerald-700 text-sm font-bold">
+                  5 spots nearby
+                </Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* AI Travel Assistant */}
         <View className="px-5 mb-5">
           <View className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
-            <View className="flex-row justify-between items-center mb-3">
-              <View className="flex-row items-center">
-                <View className="w-8 h-8 bg-emerald-500 rounded-lg items-center justify-center mr-2">
-                  <Feather name="cpu" size={16} color="#fff" />
-                </View>
+            <View className="flex-row items-center mb-3">
+              <View className="w-10 h-10 bg-emerald-500 rounded-xl items-center justify-center mr-3">
+                <Feather name="cpu" size={20} color="#fff" />
+              </View>
+              <View className="flex-1">
                 <Text className="text-gray-900 font-bold text-base">
                   AI Travel Assistant
                 </Text>
+                <Text className="text-gray-600 text-xs">
+                  Get personalized recommendations
+                </Text>
               </View>
-              <TouchableOpacity className="flex-row items-center">
-                <Text className="text-gray-600 text-sm mr-1">Details</Text>
-                <Feather name="chevron-right" size={16} color="#6B7280" />
-              </TouchableOpacity>
             </View>
 
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between mb-3">
               {[
                 { icon: "navigation", name: "Smart Routes", color: "#059669" },
                 { icon: "shield", name: "Safety Check", color: "#F97316" },
@@ -121,194 +321,38 @@ export default function Home() {
               ))}
             </View>
 
-            <View className="flex-row justify-between items-center mt-4 pt-3 border-t border-emerald-100">
-              <View>
-                <Text className="text-gray-900 font-semibold text-sm">
-                  Ready to explore?
-                </Text>
-                <Text className="text-gray-600 text-xs">
-                  Get personalized recommendations
-                </Text>
-              </View>
-              <TouchableOpacity className="bg-emerald-500 px-4 py-2 rounded-lg">
-                <Text className="text-white text-sm font-semibold">Ask AI</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        {/* Tab Navigation - Travel Focused */}
-        <View className="px-5 mb-4">
-          <View className="flex-row">
-            <TouchableOpacity className="mr-6">
-              <Text className="text-gray-900 font-bold text-base mb-1">
-                Nearby
-              </Text>
-              <View className="h-1 bg-emerald-500 rounded-full" />
-            </TouchableOpacity>
-            <TouchableOpacity className="mr-6">
-              <Text className="text-gray-500 font-medium text-base">
-                Popular
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Text className="text-gray-500 font-medium text-base">
-                Adventures
+            <TouchableOpacity className="bg-emerald-500 rounded-xl p-3 items-center">
+              <Text className="text-white text-sm font-semibold">
+                Ask AI Guide
               </Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Interactive Map Section */}
+        {/* Local Deals */}
         <View className="px-5 mb-5">
-          <View className="bg-white rounded-2xl overflow-hidden border border-gray-200">
-            <View className="h-72">
-              <MapView
-                style={{ flex: 1 }}
-                initialRegion={userLocation}
-                showsUserLocation={true}
-                className="rounded-2xl"
-              >
-                {/* Geofence circle - Core feature! */}
-                <Circle
-                  center={userLocation}
-                  radius={1000}
-                  strokeWidth={2}
-                  strokeColor="#059669"
-                  fillColor="rgba(5, 150, 105, 0.1)"
-                />
-
-                {/* Cebu spots markers */}
-                {popularSpots.map((spot) => (
-                  <Marker
-                    key={spot.id}
-                    coordinate={{
-                      latitude: spot.latitude,
-                      longitude: spot.longitude,
-                    }}
-                    title={spot.name}
-                  >
-                    <View className="bg-emerald-600 p-3 rounded-2xl shadow-lg border-2 border-white">
-                      <View className="flex-row items-center">
-                        <Feather name="map-pin" size={14} color="#fff" />
-                        <Text className="text-white text-xs font-bold ml-1">
-                          {spot.distance}
-                        </Text>
-                      </View>
-                    </View>
-                  </Marker>
-                ))}
-              </MapView>
-            </View>
-
-            {/* Map Controls */}
-            <View className="p-4 border-t border-gray-100">
-              <View className="flex-row justify-between items-center">
-                <Text className="text-gray-900 font-semibold">
-                  Live Geofencing Active
-                </Text>
-                <View className="flex-row items-center bg-emerald-100 px-3 py-1 rounded-full">
-                  <View className="w-2 h-2 bg-emerald-500 rounded-full mr-2"></View>
-                  <Text className="text-emerald-700 text-xs font-bold">
-                    5 SPOTS NEARBY
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Discover Cebu Cards */}
-        <View className="px-5 mb-6">
-          <View className="flex-row justify-between items-center mb-4">
-            <Text className="text-lg font-black text-gray-900">
-              Must-Visit in Cebu
-            </Text>
-            <TouchableOpacity className="flex-row items-center">
-              <Text className="text-emerald-600 font-semibold text-sm mr-1">
-                View All
-              </Text>
-              <Feather name="arrow-right" size={16} color="#059669" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 12 }}
-          >
-            {popularSpots.map((spot, index) => (
-              <TouchableOpacity
-                key={spot.id}
-                className="bg-white rounded-2xl overflow-hidden border border-gray-200 shadow-sm"
-                style={{ width: 280 }}
-              >
-                <View className="h-40 bg-gradient-to-r from-emerald-500 to-green-600 relative">
-                  <View className="absolute top-3 right-3 bg-white px-3 py-1 rounded-full shadow-lg">
-                    <Text className="text-gray-900 font-bold text-xs">
-                      {spot.distance}
-                    </Text>
-                  </View>
-                  <View className="absolute bottom-3 left-3 bg-black/80 px-3 py-1 rounded-full">
-                    <Text className="text-white font-bold text-xs">
-                      {spot.type.toUpperCase()}
-                    </Text>
-                  </View>
-                </View>
-                <View className="p-4">
-                  <View className="flex-row items-start justify-between mb-2">
-                    <View className="flex-1">
-                      <Text className="text-gray-900 font-black text-lg mb-1">
-                        {spot.name}
-                      </Text>
-                      <Text className="text-gray-500 text-sm">
-                        {spot.type.charAt(0).toUpperCase() + spot.type.slice(1)}{" "}
-                        Destination
-                      </Text>
-                    </View>
-                    <View className="flex-row items-center bg-yellow-100 px-2 py-1 rounded">
-                      <Feather name="star" size={12} color="#F59E0B" />
-                      <Text className="text-yellow-800 font-bold text-sm ml-1">
-                        {spot.rating}
-                      </Text>
-                    </View>
-                  </View>
-                  <View className="flex-row items-center">
-                    <Feather name="map-pin" size={12} color="#6B7280" />
-                    <Text className="text-gray-600 text-xs ml-1">
-                      Tap for directions & details
-                    </Text>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Local Deals Section */}
-        <View className="px-5 mb-6">
           <View className="bg-amber-500 rounded-2xl p-5 border-2 border-amber-400">
             <View className="flex-row justify-between items-start">
               <View className="flex-1">
-                <View className="flex-row items-center mb-2">
-                  <View className="bg-white px-3 py-1 rounded-full mr-2">
-                    <Text className="text-amber-600 text-xs font-black">
-                      🔥 LIMITED
-                    </Text>
-                  </View>
-                  <Text className="text-white text-sm font-medium">
-                    Exclusive Deal
+                <View className="bg-white px-3 py-1 rounded-full mb-2 self-start">
+                  <Text className="text-amber-600 text-xs font-black">
+                    🔥 LIMITED
                   </Text>
                 </View>
                 <Text className="text-white font-black text-2xl mb-1">
                   20% OFF
                 </Text>
-                <Text className="text-white text-base opacity-90">
-                  Selected tours & restaurants in Cebu
+                <Text className="text-white text-sm opacity-90 mb-3">
+                  Selected tours & restaurants
                 </Text>
+                <TouchableOpacity className="bg-white px-4 py-2 rounded-xl self-start">
+                  <Text className="text-amber-600 font-bold text-sm">
+                    Claim Now
+                  </Text>
+                </TouchableOpacity>
               </View>
               <View className="bg-white p-3 rounded-2xl">
-                <Feather name="gift" size={24} color="#F59E0B" />
+                <Feather name="gift" size={28} color="#F59E0B" />
               </View>
             </View>
           </View>
@@ -316,7 +360,7 @@ export default function Home() {
 
         {/* Community Activity */}
         <View className="px-5 mb-8">
-          <Text className="text-lg font-black text-gray-900 mb-4">
+          <Text className="text-lg font-black text-gray-900 mb-3">
             Live from Community
           </Text>
           <View className="bg-white rounded-2xl p-4 border border-gray-200">
@@ -358,6 +402,6 @@ export default function Home() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaWrapper>
   );
 }

@@ -6,17 +6,23 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
-  Image,
+  Alert,
 } from "react-native";
 import React, { useState, useRef } from "react";
 import { Feather } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import { SafeAreaWrapper } from "../../../components/Layout/SafeAreWrapper";
 
 export default function AIChatbot() {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Kamusta! I'm your SugVoyage AI assistant! 🌴 Ready to explore Cebu like a local? I know all the hidden gems, best food spots, and secret routes!",
+      text: "Hello! I'm your SugVoyage AI assistant. I can help you plan trips, identify places, find deals, and more. What would you like to explore in Cebu?",
       sender: "ai",
       timestamp: new Date(),
       type: "text",
@@ -24,33 +30,73 @@ export default function AIChatbot() {
   ]);
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [showFeatures, setShowFeatures] = useState(false);
   const [showPhotoOptions, setShowPhotoOptions] = useState(false);
   const scrollViewRef = useRef();
+  const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
 
-  const quickQuestions = [
-    "What's the best lechon in Cebu? 🐖",
-    "Hidden beaches near the city? 🏖️",
-    "3-day itinerary for first-timers 📅",
-    "How to avoid tourist traps? 🚫",
-    "Best time to visit waterfalls? 💦",
-    "Local transportation tips 🚌",
-    "Free activities in Cebu City 🆓",
-    "Emergency contacts & safety 🆘",
+  const features = [
+    {
+      id: "itinerary",
+      icon: "map",
+      title: "Plan Trip",
+      color: "#10b981",
+      prompt: "Create a personalized itinerary for Cebu",
+    },
+    {
+      id: "identify",
+      icon: "camera",
+      title: "Identify",
+      color: "#f59e0b",
+      prompt: "Identify a place from photo",
+    },
+    {
+      id: "flight",
+      icon: "clock",
+      title: "Flight Time",
+      color: "#3b82f6",
+      prompt: "Activities based on flight schedule",
+    },
+    {
+      id: "nearby",
+      icon: "navigation",
+      title: "Nearby",
+      color: "#8b5cf6",
+      prompt: "Attractions near my location",
+    },
+    {
+      id: "promos",
+      icon: "tag",
+      title: "Deals",
+      color: "#ef4444",
+      prompt: "Current promotions in Cebu",
+    },
+    {
+      id: "food",
+      icon: "coffee",
+      title: "Food",
+      color: "#f97316",
+      prompt: "Best local restaurants and dishes",
+    },
   ];
 
-  const photoRecognitionOptions = [
-    { icon: "camera", label: "Take Photo", action: "camera" },
-    { icon: "image", label: "Gallery", action: "gallery" },
-    { icon: "map-pin", label: "Scan Landmark", action: "landmark" },
-    { icon: "coffee", label: "Identify Food", action: "food" },
+  const quickQuestions = [
+    "Best lechon in Cebu?",
+    "Hidden beaches near city?",
+    "3-day itinerary ideas",
+    "Free activities in Cebu City",
+    "Local transportation tips",
+    "Best time for waterfalls",
+    "Emergency contacts & safety",
+    "Cultural sites to visit",
   ];
 
   const handleSend = () => {
     if (inputText.trim() === "") return;
 
-    // Add user message
     const userMessage = {
-      id: messages.length + 1,
+      id: Date.now(),
       text: inputText,
       sender: "user",
       timestamp: new Date(),
@@ -61,26 +107,67 @@ export default function AIChatbot() {
     setInputText("");
     setIsTyping(true);
 
-    // Simulate AI response with local expertise
     setTimeout(() => {
       const aiResponses = [
-        "For authentic lechon, head to CNT in Mandaue or Rico's in Lapu-Lapu! The skin should be crispy and the meat juicy. Best enjoyed with puso (hanging rice)! 🍚",
+        "For authentic Cebu lechon, I recommend CNT in Mandaue or Rico's in Lapu-Lapu. The skin should be crispy and the meat perfectly seasoned. Best enjoyed with puso (hanging rice)!",
 
-        "Here's a perfect 3-day Cebu adventure:\n\n📍Day 1: City Heritage\n• Magellan's Cross & Basilica\n• Fort San Pedro\n• Temple of Leah sunset\n• Larsian BBQ for dinner\n\n📍Day 2: Island Escape  \n• Early ferry to Bantayan\n• Sugar Beach swimming\n• Local seafood lunch\n• Star gazing at night\n\n📍Day 3: Waterfall Adventure\n• Kawasan Falls canyoneering\n• Local guide recommended\n• Try the bamboo raft ride\n• Back to city by evening\n\nWant me to customize this? 🤿",
+        "Here's a perfect 3-day Cebu itinerary:\n\nDay 1: City Heritage\n• Magellan's Cross & Basilica\n• Fort San Pedro\n• Temple of Leah sunset\n\nDay 2: Island Escape  \n• Bantayan Island day trip\n• Beach swimming & seafood\n\nDay 3: Adventure\n• Kawasan Falls canyoneering\n• Local guide recommended",
 
-        "Secret beaches near the city:\n\n🏝️ Bantayan Island - 4hrs north, worth the trip!\n🏝️ Malapascua - Amazing for diving\n🏝️ Camotes - Hidden paradise\n🏝️ Mactan resorts - Quick access\n\nPro tip: Take the earliest ferry to avoid crowds! ⛴️",
+        "Hidden beaches near the city:\n• Bantayan Island (4hrs north)\n• Malapascua (great for diving)\n• Camotes (hidden paradise)\n\nPro tip: Take the earliest ferry to avoid crowds!",
 
-        "Local transportation guide:\n\n🚙 Grab - Most convenient\n🚌 Jeepneys - Authentic experience (₱8-15)\n🚕 Taxis - Use meter only\n🛵 Habal-habal - For adventurous routes\n🚢 Ferries - Book online in advance\n\nAlways agree on price before riding! 💰",
+        "Local transportation guide:\n• Grab - Most convenient\n• Jeepneys - Authentic (₱8-15)\n• Taxis - Use meter only\n• Habal-habal - Adventurous routes\n\nAlways agree on price before riding!",
 
-        "Must-try Cebuano foods:\n\n🍖 Lechon Cebu - World's best roasted pig\n🐟 Danggit - Crispy dried fish breakfast \n🥭 Dried Mangoes - Sweetest in the world\n🍚 Puso - Hanging rice\n🍲 Sutukil - Fresh seafood trio\n📍 Larsian BBQ for authentic experience! 🍽️",
+        "Must-try Cebuano foods:\n• Lechon Cebu - World's best\n• Danggit - Crispy dried fish\n• Dried Mangoes - Sweet treats\n• Puso - Hanging rice\n• Sutukil - Fresh seafood",
       ];
 
       const randomResponse =
         aiResponses[Math.floor(Math.random() * aiResponses.length)];
 
       const aiMessage = {
-        id: messages.length + 2,
+        id: Date.now() + 1,
         text: randomResponse,
+        sender: "ai",
+        timestamp: new Date(),
+        type: "text",
+      };
+
+      setMessages((prev) => [...prev, aiMessage]);
+      setIsTyping(false);
+    }, 1500);
+  };
+
+  const handleQuickQuestion = (question) => {
+    const userMessage = {
+      id: Date.now(),
+      text: question,
+      sender: "user",
+      timestamp: new Date(),
+      type: "text",
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setIsTyping(true);
+
+    setTimeout(() => {
+      let response = "";
+
+      if (question.includes("lechon")) {
+        response =
+          "Top lechon spots:\n• CNT Lechon - Mandaue (original)\n• Rico's Lechon - Lapu-Lapu (spicy)\n• House of Lechon - Cebu City\n\nGo before 12PM for the crispiest skin!";
+      } else if (question.includes("itinerary")) {
+        response =
+          "Perfect 3-day plan:\n\n🌅 Day 1: City Culture\n• Heritage sites & local markets\n• Temple of Leah sunset\n\n🏝️ Day 2: Island Adventure  \n• Beach hopping & snorkeling\n• Fresh seafood experience\n\n💦 Day 3: Nature\n• Waterfall adventures\n• Bamboo raft experience";
+      } else if (question.includes("hidden")) {
+        response =
+          "Local secrets:\n• Sirao Flower Farm - Little Amsterdam\n• Top of Cebu - Mountain views\n• Molave Cove - Cliff diving\n• Taoist Temple - Peaceful gardens\n\nThese are less crowded and magical!";
+      } else {
+        response =
+          "I recommend visiting waterfalls in the morning (7-10AM) to avoid crowds. Beaches are perfect from 3-5PM for golden hour. Local guides are available at most spots for safety and hidden viewpoints.";
+      }
+
+      const aiMessage = {
+        id: Date.now() + 1,
+        text: response,
         sender: "ai",
         timestamp: new Date(),
         type: "text",
@@ -91,10 +178,17 @@ export default function AIChatbot() {
     }, 1200);
   };
 
-  const handleQuickQuestion = (question) => {
+  const handleFeatureSelect = async (feature) => {
+    setShowFeatures(false);
+
+    if (feature.id === "identify") {
+      setShowPhotoOptions(true);
+      return;
+    }
+
     const userMessage = {
-      id: messages.length + 1,
-      text: question,
+      id: Date.now(),
+      text: feature.prompt,
       sender: "user",
       timestamp: new Date(),
       type: "text",
@@ -103,27 +197,26 @@ export default function AIChatbot() {
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Special responses for specific questions
     setTimeout(() => {
-      let response = "";
+      const featureResponses = {
+        itinerary:
+          "I'd love to help plan your Cebu adventure! 🗺️\n\nTo create the perfect itinerary, tell me:\n• How many days?\n• Your interests (beaches, history, food, adventure)?\n• Travel companions?\n• Budget range?",
 
-      if (question.includes("lechon")) {
-        response =
-          "Top lechon spots in Cebu:\n\n🥇 CNT Lechon - Mandaue (original recipe)\n🥈 Rico's Lechon - Lapu-Lapu (spicy option)\n🥉 House of Lechon - Cebu City (consistent quality)\n\nPro tip: Go before 12PM for the crispiest skin! They often sell out by afternoon. 🕛";
-      } else if (question.includes("itinerary")) {
-        response =
-          "I'd recommend:\n\n🌅 Day 1: City Culture & Food\n• Magellan's Cross & Basilica\n• Fort San Pedro \n• Carbon Market experience\n• Temple of Leah for sunset\n• Dinner at Larsian BBQ\n\n🏝️ Day 2: Island Adventure  \n• Early ferry to Bantayan\n• Beach hopping & snorkeling\n• Fresh seafood lunch\n• Virgin Island sandbar\n\n💦 Day 3: Nature & Adventure\n• Kawasan Falls canyoneering\n• Local guide for safety\n• Bamboo raft experience\n• Back to city by evening\n\nWant me to adjust based on your interests? 🗺️";
-      } else if (question.includes("hidden")) {
-        response =
-          "Local secrets! 🤫\n\n🏞️ Sirao Flower Farm - Little Amsterdam of Cebu\n⛰️ Top of Cebu - Panoramic mountain views\n🏛️ Casa Gorordo - Heritage museum\n🌊 Molave Cove - Cliff diving spot\n🛕 Taoist Temple - Peaceful gardens\n\nThese are less crowded and absolutely magical! ✨";
-      } else {
-        response =
-          "Great question! Based on local knowledge, I recommend visiting waterfalls in the morning (7-10AM) to avoid crowds and get the best light for photos. Beaches are perfect from 3-5PM for that golden hour glow! Local guides are available at most spots - they know the safest routes and hidden viewpoints. 🗿";
-      }
+        flight:
+          "Let me maximize your time around flights! ✈️\n\nShare:\n• Flight times\n• Current location\n• Interests\n\nI'll suggest activities that fit your schedule!",
+
+        nearby:
+          "I'll find the best spots near you! 📍\n\nBased on your location:\n• Cultural sites (2-3km)\n• Scenic spots\n• Food destinations\n• Shopping areas\n\nWhich interests you?",
+
+        promos:
+          "Current Cebu promotions: 🎁\n• 20% off at local cafes\n• Free city tours\n• Shopping discounts\n• Transport deals\n\nWant details on any?",
+
+        food: "Cebu's food scene is amazing! 🍽️\n\nMust-try:\n• Lechon Cebu\n• Danggit with Rice\n• Sutukil seafood\n• Puso rice\n• Dried Mangoes\n\nWant specific locations?",
+      };
 
       const aiMessage = {
-        id: messages.length + 2,
-        text: response,
+        id: Date.now() + 1,
+        text: featureResponses[feature.id],
         sender: "ai",
         timestamp: new Date(),
         type: "text",
@@ -131,15 +224,26 @@ export default function AIChatbot() {
 
       setMessages((prev) => [...prev, aiMessage]);
       setIsTyping(false);
-    }, 1000);
+    }, 1500);
   };
 
-  const handlePhotoAction = (action) => {
+  const takePhoto = async () => {
     setShowPhotoOptions(false);
 
+    // Request camera permissions
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission required",
+        "Sorry, we need camera permissions to make this work!"
+      );
+      return;
+    }
+
     const userMessage = {
-      id: messages.length + 1,
-      text: `[${action === "camera" ? "Taking photo..." : action === "gallery" ? "Selecting from gallery..." : action === "landmark" ? "Scanning landmark..." : "Identifying food..."}]`,
+      id: Date.now(),
+      text: "📸 Taking a photo to identify...",
       sender: "user",
       timestamp: new Date(),
       type: "action",
@@ -148,29 +252,96 @@ export default function AIChatbot() {
     setMessages((prev) => [...prev, userMessage]);
     setIsTyping(true);
 
-    // Simulate photo recognition
-    setTimeout(() => {
-      const recognitionResults = {
-        camera:
-          "📸 Photo received! I can see you're at a beautiful location. This looks like the Cebu Taoist Temple area! Would you like directions or nearby recommendations?",
-        gallery:
-          "🖼️ Analyzing your photo... This appears to be Magellan's Cross! Historical fact: This marks the spot where Ferdinand Magellan planted the cross in 1521. Want to know more about its history?",
-        landmark:
-          "🏛️ Landmark detected! This is the Temple of Leah - often called the 'Taj Mahal of Cebu'. It's open daily from 6AM-6PM. Entrance fee is ₱100. Best time to visit is during sunset! 🌅",
-        food: "🍽️ Food scan complete! This looks like authentic Cebu lechon! The crispy skin and golden color suggest it's from either CNT or Rico's. Perfect with puso (hanging rice) and toyomansi dip! 🐖",
-      };
+    // Launch camera
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
 
-      const aiMessage = {
-        id: messages.length + 2,
-        text: recognitionResults[action],
-        sender: "ai",
-        timestamp: new Date(),
-        type: "text",
-      };
+    if (!result.canceled) {
+      // Simulate AI analyzing the photo
+      setTimeout(() => {
+        const landmarks = [
+          "Magellan's Cross",
+          "Basilica Minore del Santo Niño",
+          "Temple of Leah",
+          "Fort San Pedro",
+          "Taoist Temple",
+          "Sirao Flower Farm",
+          "Kawasan Falls",
+          "Cebu Taoist Temple",
+        ];
 
-      setMessages((prev) => [...prev, aiMessage]);
+        const randomLandmark =
+          landmarks[Math.floor(Math.random() * landmarks.length)];
+
+        const aiMessage = {
+          id: Date.now() + 1,
+          text: `📸 Photo analyzed! I can see you're at ${randomLandmark}! This is one of Cebu's most iconic spots. Would you like to know more about its history, visiting hours, or nearby recommendations?`,
+          sender: "ai",
+          timestamp: new Date(),
+          type: "text",
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+        setIsTyping(false);
+      }, 2000);
+    } else {
       setIsTyping(false);
-    }, 2000);
+    }
+  };
+
+  const pickFromGallery = async () => {
+    setShowPhotoOptions(false);
+
+    const userMessage = {
+      id: Date.now(),
+      text: "🖼️ Selecting photo from gallery...",
+      sender: "user",
+      timestamp: new Date(),
+      type: "action",
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setIsTyping(true);
+
+    // Launch image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      // Simulate AI analyzing the photo
+      setTimeout(() => {
+        const landmarks = [
+          "Magellan's Cross - This marks the spot where Ferdinand Magellan planted the cross in 1521, symbolizing the introduction of Christianity to the Philippines.",
+          "Basilica Minore del Santo Niño - Home to the oldest religious image in the Philippines, the Santo Niño de Cebú.",
+          "Temple of Leah - Often called the 'Taj Mahal of Cebu', built as a symbol of undying love.",
+          "Fort San Pedro - The smallest and oldest triangular bastion fort in the Philippines.",
+          "Cebu Taoist Temple - Built by the Chinese community in Cebu, offering panoramic views of the city.",
+        ];
+
+        const randomLandmark =
+          landmarks[Math.floor(Math.random() * landmarks.length)];
+
+        const aiMessage = {
+          id: Date.now() + 1,
+          text: `🖼️ Photo analyzed! ${randomLandmark}\n\nWould you like directions, visiting hours, or nearby restaurant recommendations?`,
+          sender: "ai",
+          timestamp: new Date(),
+          type: "text",
+        };
+
+        setMessages((prev) => [...prev, aiMessage]);
+        setIsTyping(false);
+      }, 2000);
+    } else {
+      setIsTyping(false);
+    }
   };
 
   const formatTime = (date) => {
@@ -178,25 +349,27 @@ export default function AIChatbot() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
-      <View className="bg-white pt-4 pb-4 px-5 border-b border-gray-200 shadow-sm z-40">
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center">
-            <View className="w-12 h-12 bg-emerald-500 rounded-2xl items-center justify-center mr-3 shadow-lg">
-              <Feather name="navigation" size={24} color="#FFFFFF" />
-            </View>
-            <View>
-              <Text className="text-xl font-black text-gray-900">
-                Cebu Travel AI
-              </Text>
-              <Text className="text-emerald-600 text-sm font-medium">
-                Your Local Guide 🤙
-              </Text>
-            </View>
+    <SafeAreaWrapper className="flex-1 bg-white">
+      {/* Header with Back Button */}
+      <View className="bg-white pt-4 pb-3 px-5 border-b border-gray-100">
+        <View className="flex-row items-center">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="p-2 mr-3"
+          >
+            <Feather name="arrow-left" size={20} color="#6b7280" />
+          </TouchableOpacity>
+          <View className="flex-1">
+            <Text className="text-xl font-bold text-gray-900">
+              SugVoyage AI
+            </Text>
+            <Text className="text-gray-500 text-sm">Your Travel Companion</Text>
           </View>
-          <TouchableOpacity className="bg-gray-100 p-2 rounded-xl">
-            <Feather name="more-horizontal" size={20} color="#374151" />
+          <TouchableOpacity
+            onPress={() => setShowFeatures(!showFeatures)}
+            className="p-2"
+          >
+            <Feather name="grid" size={20} color="#6b7280" />
           </TouchableOpacity>
         </View>
       </View>
@@ -214,49 +387,6 @@ export default function AIChatbot() {
           className="flex-1 px-4 py-4"
           showsVerticalScrollIndicator={false}
         >
-          {/* Welcome Card */}
-          <View className="bg-emerald-500 rounded-2xl p-5 mb-4 shadow-lg">
-            <View className="flex-row items-start">
-              <View className="bg-white p-3 rounded-2xl mr-3">
-                <Feather name="map" size={20} color="#059669" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-white font-black text-lg mb-1">
-                  Kamusta, Explorer! 🇵🇭
-                </Text>
-                <Text className="text-emerald-100 text-sm">
-                  I'm your local Cebu AI guide! I can: • Plan your itinerary 📅
-                  • Find hidden gems 💎 • Identify places from photos 📸 • Share
-                  local secrets 🤫 • Emergency assistance 🆘
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Quick Questions */}
-          <View className="mb-6">
-            <Text className="text-gray-900 font-black text-base mb-3">
-              Quick Local Questions:
-            </Text>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ gap: 12 }}
-            >
-              {quickQuestions.map((question, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => handleQuickQuestion(question)}
-                  className="bg-white border border-emerald-200 px-4 py-3 rounded-2xl shadow-sm"
-                >
-                  <Text className="text-gray-800 text-sm font-medium text-center">
-                    {question}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </View>
-
           {/* Messages */}
           {messages.map((message) => (
             <View
@@ -266,15 +396,15 @@ export default function AIChatbot() {
               }`}
             >
               <View
-                className={`max-w-[85%] rounded-2xl p-4 ${
+                className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                   message.sender === "user"
-                    ? "bg-emerald-500 rounded-br-none shadow-lg"
-                    : "bg-gray-100 rounded-bl-none border border-gray-200"
+                    ? "bg-blue-500 rounded-br-md"
+                    : "bg-gray-100 rounded-bl-md"
                 }`}
               >
                 {message.type === "action" ? (
                   <View className="flex-row items-center">
-                    <Feather name="camera" size={16} color="#6B7280" />
+                    <Feather name="camera" size={16} color="#6b7280" />
                     <Text className="text-gray-600 text-sm ml-2 italic">
                       {message.text}
                     </Text>
@@ -284,16 +414,16 @@ export default function AIChatbot() {
                     <Text
                       className={
                         message.sender === "user"
-                          ? "text-white text-sm leading-5"
-                          : "text-gray-800 text-sm leading-5"
+                          ? "text-white text-sm leading-6"
+                          : "text-gray-800 text-sm leading-6"
                       }
                     >
                       {message.text}
                     </Text>
                     <Text
-                      className={`text-xs mt-2 ${
+                      className={`text-xs mt-1 ${
                         message.sender === "user"
-                          ? "text-emerald-100"
+                          ? "text-blue-100"
                           : "text-gray-500"
                       }`}
                     >
@@ -308,56 +438,87 @@ export default function AIChatbot() {
           {/* Typing Indicator */}
           {isTyping && (
             <View className="flex-row mb-4 justify-start">
-              <View className="bg-gray-100 rounded-2xl rounded-bl-none p-4 border border-gray-200">
+              <View className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                 <View className="flex-row items-center">
-                  <Text className="text-gray-600 text-sm mr-2">
-                    Local AI is typing
-                  </Text>
                   <View className="flex-row space-x-1">
-                    <View className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" />
+                    <View className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" />
                     <View
-                      className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0.1s" }}
                     />
                     <View
-                      className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"
+                      className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
                       style={{ animationDelay: "0.2s" }}
                     />
                   </View>
+                  <Text className="text-gray-500 text-sm ml-2">
+                    AI is thinking...
+                  </Text>
                 </View>
               </View>
             </View>
           )}
         </ScrollView>
 
-        {/* Photo Recognition Modal */}
-        {showPhotoOptions && (
-          <View className="absolute inset-0 bg-black/50 justify-end z-50">
+        {/* Quick Questions Box - Above Input */}
+        {messages.length <= 1 && (
+          <View className="bg-gray-50 border-t border-gray-200 px-4 py-3">
+            <Text className="text-gray-700 font-medium text-sm mb-2">
+              Quick questions:
+            </Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ gap: 8 }}
+            >
+              {quickQuestions.map((question, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => handleQuickQuestion(question)}
+                  className="bg-white border border-gray-300 px-3 py-2 rounded-xl shadow-sm"
+                >
+                  <Text className="text-gray-700 text-sm">{question}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* Features Overlay */}
+        {showFeatures && (
+          <View className="absolute inset-0 bg-black/40 justify-end z-50">
             <View className="bg-white rounded-t-3xl p-6">
-              <View className="flex-row justify-between items-center mb-4">
-                <Text className="text-lg font-black text-gray-900">
-                  Photo Recognition
+              <View className="flex-row justify-between items-center mb-6">
+                <Text className="text-lg font-bold text-gray-900">
+                  AI Features
                 </Text>
-                <TouchableOpacity onPress={() => setShowPhotoOptions(false)}>
-                  <Feather name="x" size={24} color="#374151" />
+                <TouchableOpacity
+                  onPress={() => setShowFeatures(false)}
+                  className="p-2"
+                >
+                  <Feather name="x" size={20} color="#6b7280" />
                 </TouchableOpacity>
               </View>
-              <Text className="text-gray-600 text-sm mb-4">
-                Use AI to identify landmarks, food, or get information about
-                places from photos
-              </Text>
+
               <View className="flex-row flex-wrap justify-between">
-                {photoRecognitionOptions.map((option, index) => (
+                {features.map((feature, index) => (
                   <TouchableOpacity
-                    key={index}
-                    onPress={() => handlePhotoAction(option.action)}
-                    className="w-[48%] bg-emerald-50 rounded-2xl p-4 mb-3 items-center border border-emerald-200"
+                    key={feature.id}
+                    onPress={() => handleFeatureSelect(feature)}
+                    className="w-[30%] items-center mb-6"
                   >
-                    <View className="w-12 h-12 bg-emerald-500 rounded-xl items-center justify-center mb-2">
-                      <Feather name={option.icon} size={20} color="#FFFFFF" />
+                    <View
+                      className="w-16 h-16 rounded-2xl items-center justify-center mb-2"
+                      style={{ backgroundColor: `${feature.color}15` }}
+                    >
+                      <Feather
+                        name={feature.icon}
+                        size={24}
+                        color={feature.color}
+                      />
                     </View>
-                    <Text className="text-emerald-700 text-sm font-semibold text-center">
-                      {option.label}
+                    <Text className="text-gray-800 text-sm font-medium text-center">
+                      {feature.title}
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -366,66 +527,99 @@ export default function AIChatbot() {
           </View>
         )}
 
+        {/* Photo Options Overlay */}
+        {showPhotoOptions && (
+          <View
+            style={{ paddingBottom: insets.bottom }}
+            className="absolute inset-0 bg-black/40 justify-end z-50"
+          >
+            <View className="bg-white rounded-t-3xl p-6">
+              <View className="flex-row justify-between items-center mb-6">
+                <Text className="text-lg font-bold text-gray-900">
+                  Identify Place
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setShowPhotoOptions(false)}
+                  className="p-2"
+                >
+                  <Feather name="x" size={20} color="#6b7280" />
+                </TouchableOpacity>
+              </View>
+
+              <Text className="text-gray-600 text-sm mb-6 text-center">
+                Choose how you'd like to identify a place in Cebu
+              </Text>
+
+              <View className="flex-row justify-between">
+                <TouchableOpacity
+                  onPress={takePhoto}
+                  className="flex-1 bg-orange-50 rounded-2xl p-5 mx-2 items-center border border-orange-200"
+                >
+                  <View className="w-16 h-16 bg-orange-500 rounded-2xl items-center justify-center mb-3">
+                    <Feather name="camera" size={28} color="#FFFFFF" />
+                  </View>
+                  <Text className="text-orange-700 font-semibold text-center">
+                    Take Photo
+                  </Text>
+                  <Text className="text-orange-600 text-xs text-center mt-1">
+                    Use camera
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={pickFromGallery}
+                  className="flex-1 bg-blue-50 rounded-2xl p-5 mx-2 items-center border border-blue-200"
+                >
+                  <View className="w-16 h-16 bg-blue-500 rounded-2xl items-center justify-center mb-3">
+                    <Feather name="image" size={28} color="#FFFFFF" />
+                  </View>
+                  <Text className="text-blue-700 font-semibold text-center">
+                    Gallery
+                  </Text>
+                  <Text className="text-blue-600 text-xs text-center mt-1">
+                    Choose existing
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        )}
+
         {/* Input Area */}
-        <View className="bg-white border-t border-gray-200 px-4 py-4">
+        <View
+          className="bg-white border-t border-gray-100 px-4 py-4"
+          style={{ paddingBottom: insets.bottom }}
+        >
           <View className="flex-row items-center">
             <TouchableOpacity
-              onPress={() => setShowPhotoOptions(true)}
-              className="w-12 h-12 bg-emerald-100 rounded-xl items-center justify-center mr-3 border border-emerald-200"
+              onPress={() => setShowFeatures(true)}
+              className="w-10 h-10 bg-gray-100 rounded-xl items-center justify-center mr-3"
             >
-              <Feather name="camera" size={20} color="#059669" />
+              <Feather name="plus" size={18} color="#6b7280" />
             </TouchableOpacity>
 
             <TextInput
-              placeholder="Ask about Cebu travel, food, or take a photo..."
-              className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-gray-800 mr-3 border border-gray-300"
+              placeholder="Ask about Cebu travel..."
+              className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-gray-800 mr-3"
               value={inputText}
               onChangeText={setInputText}
               multiline
               maxLength={500}
-              placeholderTextColor="#6B7280"
+              placeholderTextColor="#9ca3af"
             />
 
             <TouchableOpacity
               onPress={handleSend}
               disabled={inputText.trim() === ""}
-              className={`w-12 h-12 rounded-xl items-center justify-center ${
-                inputText.trim() === "" ? "bg-gray-400" : "bg-emerald-500"
+              className={`w-10 h-10 rounded-xl items-center justify-center ${
+                inputText.trim() === "" ? "bg-gray-300" : "bg-blue-500"
               }`}
             >
-              <Feather name="send" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-          </View>
-
-          {/* Quick Actions */}
-          <View className="flex-row justify-between mt-3">
-            <TouchableOpacity className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg">
-              <Feather name="map" size={16} color="#4B5563" />
-              <Text className="text-gray-700 text-sm ml-2 font-medium">
-                Near Me
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg">
-              <Feather name="shield" size={16} color="#4B5563" />
-              <Text className="text-gray-700 text-sm ml-2 font-medium">
-                Safety
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg">
-              <Feather name="dollar-sign" size={16} color="#4B5563" />
-              <Text className="text-gray-700 text-sm ml-2 font-medium">
-                Budget
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity className="flex-row items-center bg-gray-100 px-3 py-2 rounded-lg">
-              <Feather name="heart" size={16} color="#4B5563" />
-              <Text className="text-gray-700 text-sm ml-2 font-medium">
-                Saved
-              </Text>
+              <Feather name="send" size={16} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </SafeAreaWrapper>
   );
 }
