@@ -223,27 +223,10 @@ export default function Map() {
                 latitude: spot.latitude,
                 longitude: spot.longitude,
               }}
-              onPress={() => focusOnSpot(spot)}
+              title={spot.name}
             >
-              <View
-                className={`p-3 rounded-2xl border-2 border-white shadow-xl ${
-                  selectedSpot?.id === spot.id ? "scale-110" : ""
-                }`}
-                style={{ backgroundColor: spot.color }}
-              >
-                <View className="flex-row items-center">
-                  <Feather
-                    name={getSpotIcon(spot.type)}
-                    size={16}
-                    color="#FFFFFF"
-                  />
-                  <Text className="text-white font-black text-xs ml-1">
-                    {spot.distance.split(" ")[0]}
-                  </Text>
-                </View>
-                <Text className="text-white font-bold text-xs mt-1">
-                  {spot.name}
-                </Text>
+              <View className="bg-emerald-500 w-6 h-6 rounded-full border-2 border-white items-center justify-center shadow-lg">
+                <Feather name="map-pin" size={12} color="#fff" />
               </View>
             </Marker>
           ))}
