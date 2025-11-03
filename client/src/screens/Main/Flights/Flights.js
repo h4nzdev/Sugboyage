@@ -8,21 +8,32 @@ import {
 import React, { useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaWrapper } from "../../../components/Layout/SafeAreWrapper";
+import { ScreenWrapper } from "../../../components/Layout/ScreenWrapper";
 
 export default function Flights() {
   const [activeTab, setActiveTab] = useState("myFlights");
   const [flightNumber, setFlightNumber] = useState("");
 
-  // Simplified data
+  const colors = {
+    primary: "#06b6d4",
+    secondary: "#22d3ee",
+    accent: "#67e8f9",
+    light: "#f0fdff",
+    background: "#ffffff",
+    border: "#cffafe",
+    text: "#164e63",
+    muted: "#0e7490",
+  };
+
   const myFlights = [
     {
       id: 1,
       airline: "Cebu Pacific",
       flight: "5J 123",
-      route: "Manila → Cebu → Singapore",
+      route: "Manila → Cebu",
       date: "Dec 15, 2024",
       time: "08:00 AM - 09:30 AM",
-      layover: "6h 15m",
+      terminal: "T2",
       status: "confirmed",
     },
     {
@@ -32,7 +43,7 @@ export default function Flights() {
       route: "Cebu → Tokyo",
       date: "Jan 20, 2024",
       time: "02:00 PM - 08:00 PM",
-      layover: "None",
+      terminal: "T1",
       status: "confirmed",
     },
   ];
@@ -40,17 +51,19 @@ export default function Flights() {
   const layoverIdeas = [
     {
       id: 1,
-      title: "Mactan Shrine Visit",
+      title: "Mactan Shrine",
       time: "1-2 hours",
       budget: "₱500",
       type: "cultural",
+      distance: "15min from airport",
     },
     {
       id: 2,
-      title: "Airport Relaxation",
-      time: "1-2 hours",
-      budget: "₱1,200",
+      title: "Airport Lounge",
+      time: "2 hours",
+      budget: "₱800",
       type: "relax",
+      distance: "In terminal",
     },
     {
       id: 3,
@@ -58,80 +71,93 @@ export default function Flights() {
       time: "1.5 hours",
       budget: "₱600",
       type: "food",
+      distance: "10min from airport",
     },
   ];
 
   const tabs = [
-    { id: "myFlights", label: "My Flights", count: myFlights.length },
-    { id: "layovers", label: "Layovers", count: layoverIdeas.length },
-    { id: "deals", label: "Deals", count: 3 },
+    { id: "myFlights", label: "My Flights", icon: "airplay" },
+    { id: "layovers", label: "Layovers", icon: "clock" },
+    { id: "deals", label: "Deals", icon: "tag" },
   ];
 
   return (
-    <SafeAreaWrapper className="flex-1 bg-white">
+    <ScreenWrapper className="flex-1 bg-gray-50">
       {/* Clean Header */}
       <View className="px-5 pt-6 pb-4">
         <View className="flex-row justify-between items-center">
           <View>
-            <Text className="text-2xl font-black text-gray-900">Flights</Text>
-            <Text className="text-gray-500 text-sm mt-1">
+            <Text className="text-2xl font-bold" style={{ color: colors.text }}>
+              Flights
+            </Text>
+            <Text className="text-sm mt-1" style={{ color: colors.muted }}>
               Flight plans & layovers
             </Text>
           </View>
-          <TouchableOpacity className="bg-gray-100 w-10 h-10 rounded-xl items-center justify-center">
-            <Feather name="search" size={20} color="#374151" />
+          <TouchableOpacity
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: colors.light }}
+          >
+            <Feather name="search" size={18} color={colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Simple Flight Input */}
       <View className="px-5 mt-4">
-        <View className="bg-gray-50 rounded-2xl p-4">
-          <Text className="text-gray-900 font-semibold mb-3">
+        <View
+          className="rounded-xl p-4"
+          style={{ backgroundColor: colors.light }}
+        >
+          <Text className="font-semibold mb-3" style={{ color: colors.text }}>
             Track Your Flight
           </Text>
           <View className="flex-row">
             <TextInput
               placeholder="Flight number (e.g., 5J 123)"
-              className="flex-1 bg-white rounded-xl px-4 py-3 border border-gray-200 mr-2"
+              className="flex-1 bg-white rounded-xl px-4 py-3 mr-2 text-sm"
+              style={{ color: colors.text }}
               value={flightNumber}
               onChangeText={setFlightNumber}
+              placeholderTextColor={colors.muted}
             />
-            <TouchableOpacity className="bg-emerald-500 w-12 h-12 rounded-xl items-center justify-center">
-              <Feather name="search" size={20} color="#FFFFFF" />
+            <TouchableOpacity
+              className="w-12 h-12 rounded-xl items-center justify-center"
+              style={{ backgroundColor: colors.primary }}
+            >
+              <Feather name="search" size={18} color="#FFFFFF" />
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
       {/* Minimal Tabs */}
-      <View className="px-5 mt-6 border-b border-gray-100">
+      <View
+        className="px-5 mt-6 border-b"
+        style={{ borderColor: colors.border }}
+      >
         <View className="flex-row">
           {tabs.map((tab) => (
             <TouchableOpacity
               key={tab.id}
               onPress={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 items-center border-b-2 ${
-                activeTab === tab.id
-                  ? "border-emerald-500"
-                  : "border-transparent"
+                activeTab === tab.id ? "border-cyan-500" : "border-transparent"
               }`}
             >
               <View className="flex-row items-center">
+                <Feather
+                  name={tab.icon}
+                  size={16}
+                  color={activeTab === tab.id ? colors.primary : colors.muted}
+                />
                 <Text
-                  className={`font-medium text-sm ${
-                    activeTab === tab.id ? "text-emerald-600" : "text-gray-600"
+                  className={`ml-2 text-sm font-semibold ${
+                    activeTab === tab.id ? "text-cyan-600" : "text-gray-500"
                   }`}
                 >
                   {tab.label}
                 </Text>
-                {tab.count > 0 && (
-                  <View className="ml-1 bg-gray-200 px-1.5 rounded-full">
-                    <Text className="text-gray-600 text-xs font-medium">
-                      {tab.count}
-                    </Text>
-                  </View>
-                )}
               </View>
             </TouchableOpacity>
           ))}
@@ -143,97 +169,149 @@ export default function Flights() {
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 20 }}
       >
-        {/* MY FLIGHTS - Clean Cards */}
+        {/* MY FLIGHTS */}
         {activeTab === "myFlights" && (
           <View className="px-5 mt-6">
-            <Text className="text-lg font-black text-gray-900 mb-4">
+            <Text
+              className="text-lg font-bold mb-4"
+              style={{ color: colors.text }}
+            >
               Upcoming Flights
             </Text>
 
             {myFlights.map((flight) => (
               <TouchableOpacity
                 key={flight.id}
-                className="bg-white rounded-2xl p-5 mb-4 border border-gray-200"
+                className="bg-white rounded-xl p-4 mb-4"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
               >
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="flex-1">
-                    <View className="flex-row items-center mb-2">
-                      <View className="bg-emerald-100 px-2 py-1 rounded-full">
-                        <Text className="text-emerald-700 text-xs font-medium">
-                          {flight.airline}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text className="text-gray-900 font-bold text-lg mb-1">
-                      {flight.flight}
+                <View className="flex-row items-center mb-3">
+                  <View
+                    className="px-3 py-1 rounded-full mr-2"
+                    style={{ backgroundColor: colors.light }}
+                  >
+                    <Text
+                      className="text-xs font-semibold"
+                      style={{ color: colors.primary }}
+                    >
+                      {flight.airline}
                     </Text>
-                    <Text className="text-gray-500 text-sm">
-                      {flight.route}
+                  </View>
+                  <View
+                    className="px-3 py-1 rounded-full"
+                    style={{ backgroundColor: colors.light }}
+                  >
+                    <Text
+                      className="text-xs font-semibold"
+                      style={{ color: colors.primary }}
+                    >
+                      {flight.terminal}
                     </Text>
                   </View>
                 </View>
 
-                <View className="flex-row justify-between items-center mb-4">
-                  <View>
-                    <Text className="text-gray-900 font-semibold">
-                      {flight.time}
-                    </Text>
-                    <Text className="text-gray-500 text-sm">{flight.date}</Text>
-                  </View>
-                  {flight.layover !== "None" && (
-                    <View className="bg-orange-100 px-3 py-1 rounded-full">
-                      <Text className="text-orange-700 text-xs font-medium">
-                        {flight.layover} layover
-                      </Text>
-                    </View>
-                  )}
-                </View>
+                <Text
+                  className="font-bold text-base mb-1"
+                  style={{ color: colors.text }}
+                >
+                  {flight.flight} • {flight.route}
+                </Text>
+                <Text className="text-sm mb-2" style={{ color: colors.muted }}>
+                  {flight.date}
+                </Text>
+                <Text
+                  className="font-semibold text-sm mb-4"
+                  style={{ color: colors.text }}
+                >
+                  {flight.time}
+                </Text>
 
-                <TouchableOpacity className="bg-gray-100 py-3 rounded-xl">
-                  <Text className="text-gray-900 text-center font-semibold">
+                <TouchableOpacity
+                  className="py-3 rounded-xl"
+                  style={{ backgroundColor: colors.light }}
+                >
+                  <Text
+                    className="text-center font-semibold"
+                    style={{ color: colors.primary }}
+                  >
                     View Details
                   </Text>
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
 
-            {/* Add Flight CTA */}
-            <TouchableOpacity className="bg-gray-50 rounded-2xl p-5 border-2 border-dashed border-gray-300 items-center">
-              <View className="w-12 h-12 bg-emerald-500 rounded-xl items-center justify-center mb-3">
-                <Feather name="plus" size={20} color="#FFFFFF" />
+            {/* Add Flight */}
+            <TouchableOpacity
+              className="rounded-xl p-5 border-2 border-dashed items-center"
+              style={{ borderColor: colors.border }}
+            >
+              <View
+                className="w-12 h-12 rounded-xl items-center justify-center mb-3"
+                style={{ backgroundColor: colors.light }}
+              >
+                <Feather name="plus" size={20} color={colors.primary} />
               </View>
-              <Text className="text-gray-900 font-semibold">Add Flight</Text>
-              <Text className="text-gray-500 text-sm text-center mt-1">
+              <Text
+                className="font-semibold text-center mb-1"
+                style={{ color: colors.text }}
+              >
+                Add Flight
+              </Text>
+              <Text
+                className="text-sm text-center"
+                style={{ color: colors.muted }}
+              >
                 Track your upcoming flights
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* LAYOVER IDEAS - Clean Cards */}
+        {/* LAYOVER IDEAS */}
         {activeTab === "layovers" && (
           <View className="px-5 mt-6">
-            <Text className="text-lg font-black text-gray-900 mb-4">
+            <Text
+              className="text-lg font-bold mb-4"
+              style={{ color: colors.text }}
+            >
               Layover Ideas
             </Text>
 
             {layoverIdeas.map((idea) => (
               <TouchableOpacity
                 key={idea.id}
-                className="bg-white rounded-2xl p-5 mb-4 border border-gray-200"
+                className="bg-white rounded-xl p-4 mb-4"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
               >
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="flex-1">
-                    <Text className="text-gray-900 font-bold text-lg mb-1">
-                      {idea.title}
-                    </Text>
-                    <Text className="text-gray-500 text-sm">
-                      {idea.time} • {idea.budget}
-                    </Text>
-                  </View>
-                </View>
+                <Text
+                  className="font-bold text-base mb-1"
+                  style={{ color: colors.text }}
+                >
+                  {idea.title}
+                </Text>
+                <Text className="text-sm mb-2" style={{ color: colors.muted }}>
+                  {idea.time} • {idea.budget}
+                </Text>
+                <Text className="text-xs mb-4" style={{ color: colors.muted }}>
+                  {idea.distance}
+                </Text>
 
-                <TouchableOpacity className="bg-emerald-500 py-3 rounded-xl">
+                <TouchableOpacity
+                  className="py-3 rounded-xl"
+                  style={{ backgroundColor: colors.primary }}
+                >
                   <Text className="text-white text-center font-semibold">
                     View Plan
                   </Text>
@@ -242,16 +320,28 @@ export default function Flights() {
             ))}
 
             {/* AI Layover Planner */}
-            <TouchableOpacity className="bg-emerald-50 rounded-2xl p-5 border-2 border-emerald-200">
+            <TouchableOpacity
+              className="rounded-xl p-4 border-2 items-center"
+              style={{
+                borderColor: colors.border,
+                backgroundColor: colors.light,
+              }}
+            >
               <View className="flex-row items-center">
-                <View className="w-12 h-12 bg-emerald-500 rounded-xl items-center justify-center mr-3">
+                <View
+                  className="w-12 h-12 rounded-xl items-center justify-center mr-3"
+                  style={{ backgroundColor: colors.primary }}
+                >
                   <Feather name="cpu" size={20} color="#FFFFFF" />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-gray-900 font-semibold">
+                  <Text
+                    className="font-semibold"
+                    style={{ color: colors.text }}
+                  >
                     AI Layover Planner
                   </Text>
-                  <Text className="text-gray-500 text-sm">
+                  <Text className="text-sm" style={{ color: colors.muted }}>
                     Get personalized layover plan
                   </Text>
                 </View>
@@ -260,36 +350,69 @@ export default function Flights() {
           </View>
         )}
 
-        {/* DEALS - Clean Cards */}
+        {/* DEALS */}
         {activeTab === "deals" && (
           <View className="px-5 mt-6">
-            <Text className="text-lg font-black text-gray-900 mb-4">
+            <Text
+              className="text-lg font-bold mb-4"
+              style={{ color: colors.text }}
+            >
               Airport Deals
             </Text>
 
             <View className="gap-4">
-              <View className="bg-white rounded-2xl p-5 border border-gray-200">
-                <Text className="text-gray-900 font-semibold mb-1">
+              <View
+                className="bg-white rounded-xl p-4"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+              >
+                <Text
+                  className="font-semibold mb-1"
+                  style={{ color: colors.text }}
+                >
                   Free SIM Card
                 </Text>
-                <Text className="text-gray-500 text-sm mb-3">
+                <Text className="text-sm mb-3" style={{ color: colors.muted }}>
                   1GB data for travelers
                 </Text>
-                <TouchableOpacity className="bg-emerald-500 py-2 rounded-lg">
+                <TouchableOpacity
+                  className="py-2 rounded-lg"
+                  style={{ backgroundColor: colors.primary }}
+                >
                   <Text className="text-white text-center font-semibold text-sm">
                     Claim Deal
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              <View className="bg-white rounded-2xl p-5 border border-gray-200">
-                <Text className="text-gray-900 font-semibold mb-1">
+              <View
+                className="bg-white rounded-xl p-4"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
+              >
+                <Text
+                  className="font-semibold mb-1"
+                  style={{ color: colors.text }}
+                >
                   20% Off Massage
                 </Text>
-                <Text className="text-gray-500 text-sm mb-3">
+                <Text className="text-sm mb-3" style={{ color: colors.muted }}>
                   Relax before your flight
                 </Text>
-                <TouchableOpacity className="bg-emerald-500 py-2 rounded-lg">
+                <TouchableOpacity
+                  className="py-2 rounded-lg"
+                  style={{ backgroundColor: colors.primary }}
+                >
                   <Text className="text-white text-center font-semibold text-sm">
                     Claim Deal
                   </Text>
@@ -299,6 +422,6 @@ export default function Flights() {
           </View>
         )}
       </ScrollView>
-    </SafeAreaWrapper>
+    </ScreenWrapper>
   );
 }

@@ -2,11 +2,22 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaWrapper } from "../../../components/Layout/SafeAreWrapper";
+import { ScreenWrapper } from "../../../components/Layout/ScreenWrapper";
 
 export default function Trips() {
   const [activeTab, setActiveTab] = useState("plans");
 
-  // Simplified, clean data
+  const colors = {
+    primary: "#06b6d4",
+    secondary: "#22d3ee",
+    accent: "#67e8f9",
+    light: "#f0fdff",
+    background: "#ffffff",
+    border: "#cffafe",
+    text: "#164e63",
+    muted: "#0e7490",
+  };
+
   const plans = [
     {
       id: 1,
@@ -16,7 +27,6 @@ export default function Trips() {
       spots: 8,
       budget: "₱8,500",
       match: 98,
-      color: "#10B981",
     },
     {
       id: 2,
@@ -26,7 +36,6 @@ export default function Trips() {
       spots: 6,
       budget: "₱4,200",
       match: 92,
-      color: "#8B5CF6",
     },
   ];
 
@@ -50,61 +59,57 @@ export default function Trips() {
   ];
 
   const tabs = [
-    { id: "plans", label: "AI Plans", icon: "cpu", count: plans.length },
-    { id: "trips", label: "My Trips", icon: "map", count: myTrips.length },
-    { id: "saved", label: "Saved", icon: "bookmark", count: 3 },
+    { id: "plans", label: "AI Plans", icon: "cpu" },
+    { id: "trips", label: "My Trips", icon: "map" },
+    { id: "saved", label: "Saved", icon: "bookmark" },
   ];
 
   return (
-    <SafeAreaWrapper className="flex-1 bg-white">
+    <ScreenWrapper className="flex-1 bg-gray-50">
       {/* Clean Header */}
       <View className="px-5 pt-6 pb-4">
         <View className="flex-row justify-between items-center">
           <View>
-            <Text className="text-2xl font-black text-gray-900">Trips</Text>
-            <Text className="text-gray-500 text-sm mt-1">
+            <Text className="text-2xl font-bold" style={{ color: colors.text }}>
+              Trips
+            </Text>
+            <Text className="text-sm mt-1" style={{ color: colors.muted }}>
               Your Cebu travel plans
             </Text>
           </View>
-          <TouchableOpacity className="bg-emerald-500 w-10 h-10 rounded-xl items-center justify-center">
-            <Feather name="plus" size={20} color="#FFFFFF" />
+          <TouchableOpacity
+            className="w-10 h-10 rounded-xl items-center justify-center"
+            style={{ backgroundColor: colors.primary }}
+          >
+            <Feather name="plus" size={18} color="#FFFFFF" />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Minimal Tab Navigation */}
-      <View className="px-5 border-b border-gray-100">
+      <View className="px-5 border-b" style={{ borderColor: colors.border }}>
         <View className="flex-row">
           {tabs.map((tab) => (
             <TouchableOpacity
               key={tab.id}
               onPress={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 items-center border-b-2 ${
-                activeTab === tab.id
-                  ? "border-emerald-500"
-                  : "border-transparent"
+                activeTab === tab.id ? "border-cyan-500" : "border-transparent"
               }`}
             >
               <View className="flex-row items-center">
                 <Feather
                   name={tab.icon}
                   size={16}
-                  color={activeTab === tab.id ? "#059669" : "#6B7280"}
+                  color={activeTab === tab.id ? colors.primary : colors.muted}
                 />
                 <Text
-                  className={`ml-2 font-medium text-sm ${
-                    activeTab === tab.id ? "text-emerald-600" : "text-gray-600"
+                  className={`ml-2 text-sm font-semibold ${
+                    activeTab === tab.id ? "text-cyan-600" : "text-gray-500"
                   }`}
                 >
                   {tab.label}
                 </Text>
-                {tab.count > 0 && (
-                  <View className="ml-1 bg-gray-200 px-1.5 rounded-full">
-                    <Text className="text-gray-600 text-xs font-medium">
-                      {tab.count}
-                    </Text>
-                  </View>
-                )}
               </View>
             </TouchableOpacity>
           ))}
@@ -116,46 +121,74 @@ export default function Trips() {
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 20 }}
       >
-        {/* AI PLANS - Clean Cards */}
+        {/* AI PLANS */}
         {activeTab === "plans" && (
           <View className="px-5 mt-6">
-            <Text className="text-lg font-black text-gray-900 mb-4">
+            <Text
+              className="text-lg font-bold mb-4"
+              style={{ color: colors.text }}
+            >
               Recommended Plans
             </Text>
 
             {plans.map((plan) => (
               <TouchableOpacity
                 key={plan.id}
-                className="bg-white rounded-2xl p-5 mb-4 border border-gray-200"
+                className="bg-white rounded-xl p-4 mb-4"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
               >
-                <View className="flex-row justify-between items-start mb-3">
-                  <View className="flex-1">
-                    <View className="flex-row items-center mb-2">
-                      <View className="bg-emerald-100 px-2 py-1 rounded-full">
-                        <Text className="text-emerald-700 text-xs font-medium">
-                          {plan.type}
-                        </Text>
-                      </View>
-                      <View className="bg-purple-100 px-2 py-1 rounded-full ml-2">
-                        <Text className="text-purple-700 text-xs font-medium">
-                          {plan.match}% match
-                        </Text>
-                      </View>
-                    </View>
-                    <Text className="text-gray-900 font-bold text-lg mb-1">
-                      {plan.title}
+                <View className="flex-row items-center mb-3">
+                  <View
+                    className="px-3 py-1 rounded-full mr-2"
+                    style={{ backgroundColor: colors.light }}
+                  >
+                    <Text
+                      className="text-xs font-semibold"
+                      style={{ color: colors.primary }}
+                    >
+                      {plan.type}
                     </Text>
-                    <Text className="text-gray-500 text-sm">
-                      {plan.duration} • {plan.spots} locations
+                  </View>
+                  <View
+                    className="px-3 py-1 rounded-full"
+                    style={{ backgroundColor: colors.light }}
+                  >
+                    <Text
+                      className="text-xs font-semibold"
+                      style={{ color: colors.primary }}
+                    >
+                      {plan.match}% match
                     </Text>
                   </View>
                 </View>
 
+                <Text
+                  className="font-bold text-base mb-2"
+                  style={{ color: colors.text }}
+                >
+                  {plan.title}
+                </Text>
+                <Text className="text-sm mb-4" style={{ color: colors.muted }}>
+                  {plan.duration} • {plan.spots} locations
+                </Text>
+
                 <View className="flex-row justify-between items-center">
-                  <Text className="text-gray-900 font-semibold">
+                  <Text
+                    className="font-semibold"
+                    style={{ color: colors.text }}
+                  >
                     {plan.budget}
                   </Text>
-                  <TouchableOpacity className="bg-emerald-500 px-4 py-2 rounded-lg">
+                  <TouchableOpacity
+                    className="px-4 py-2 rounded-lg"
+                    style={{ backgroundColor: colors.primary }}
+                  >
                     <Text className="text-white text-sm font-semibold">
                       Use Plan
                     </Text>
@@ -164,127 +197,156 @@ export default function Trips() {
               </TouchableOpacity>
             ))}
 
-            {/* Create New Plan CTA */}
-            <TouchableOpacity className="bg-gray-50 rounded-2xl p-5 border-2 border-dashed border-gray-300 items-center">
-              <View className="w-12 h-12 bg-emerald-500 rounded-xl items-center justify-center mb-3">
-                <Feather name="cpu" size={20} color="#FFFFFF" />
+            {/* Create New Plan */}
+            <TouchableOpacity
+              className="bg-white rounded-xl p-5 border-2 border-dashed items-center"
+              style={{ borderColor: colors.border }}
+            >
+              <View
+                className="w-12 h-12 rounded-xl items-center justify-center mb-3"
+                style={{ backgroundColor: colors.light }}
+              >
+                <Feather name="cpu" size={20} color={colors.primary} />
               </View>
-              <Text className="text-gray-900 font-semibold text-center">
+              <Text
+                className="font-semibold text-center mb-1"
+                style={{ color: colors.text }}
+              >
                 Create AI Plan
               </Text>
-              <Text className="text-gray-500 text-sm text-center mt-1">
+              <Text
+                className="text-sm text-center"
+                style={{ color: colors.muted }}
+              >
                 Get personalized itinerary
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* MY TRIPS - Clean Cards */}
+        {/* MY TRIPS */}
         {activeTab === "trips" && (
           <View className="px-5 mt-6">
-            <Text className="text-lg font-black text-gray-900 mb-4">
+            <Text
+              className="text-lg font-bold mb-4"
+              style={{ color: colors.text }}
+            >
               My Trips
             </Text>
 
             {myTrips.map((trip) => (
               <TouchableOpacity
                 key={trip.id}
-                className="bg-white rounded-2xl p-5 mb-4 border border-gray-200"
+                className="bg-white rounded-xl p-4 mb-4"
+                style={{
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                }}
               >
-                <View className="flex-row justify-between items-start mb-4">
-                  <View className="flex-1">
-                    <View className="flex-row items-center mb-2">
-                      <View
-                        className={`px-2 py-1 rounded-full ${
-                          trip.status === "active"
-                            ? "bg-blue-100"
-                            : "bg-green-100"
-                        }`}
-                      >
-                        <Text
-                          className={`text-xs font-medium ${
-                            trip.status === "active"
-                              ? "text-blue-700"
-                              : "text-green-700"
-                          }`}
-                        >
-                          {trip.status === "active" ? "ACTIVE" : "COMPLETED"}
-                        </Text>
-                      </View>
-                    </View>
-                    <Text className="text-gray-900 font-bold text-lg mb-1">
-                      {trip.title}
-                    </Text>
-                    <Text className="text-gray-500 text-sm">
-                      {trip.date} • {trip.spots} spots
+                <View className="flex-row items-center mb-3">
+                  <View
+                    className={`px-3 py-1 rounded-full ${
+                      trip.status === "active" ? "bg-cyan-100" : "bg-green-100"
+                    }`}
+                  >
+                    <Text
+                      className={`text-xs font-semibold ${
+                        trip.status === "active"
+                          ? "text-cyan-700"
+                          : "text-green-700"
+                      }`}
+                    >
+                      {trip.status === "active" ? "ACTIVE" : "COMPLETED"}
                     </Text>
                   </View>
                 </View>
 
+                <Text
+                  className="font-bold text-base mb-1"
+                  style={{ color: colors.text }}
+                >
+                  {trip.title}
+                </Text>
+                <Text className="text-sm mb-4" style={{ color: colors.muted }}>
+                  {trip.date} • {trip.spots} spots
+                </Text>
+
                 {/* Progress */}
                 <View className="mb-4">
                   <View className="flex-row justify-between items-center mb-2">
-                    <Text className="text-gray-700 text-sm">Progress</Text>
-                    <Text className="text-gray-900 text-sm font-medium">
+                    <Text className="text-sm" style={{ color: colors.muted }}>
+                      Progress
+                    </Text>
+                    <Text
+                      className="text-sm font-semibold"
+                      style={{ color: colors.text }}
+                    >
                       {trip.progress}/{trip.spots}
                     </Text>
                   </View>
                   <View className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
                     <View
-                      className="h-full bg-emerald-500 rounded-full"
+                      className="h-full rounded-full"
                       style={{
                         width: `${(trip.progress / trip.spots) * 100}%`,
+                        backgroundColor: colors.primary,
                       }}
                     />
                   </View>
                 </View>
 
-                <TouchableOpacity className="bg-gray-100 py-3 rounded-xl">
-                  <Text className="text-gray-900 text-center font-semibold">
+                <TouchableOpacity
+                  className="py-3 rounded-xl"
+                  style={{ backgroundColor: colors.light }}
+                >
+                  <Text
+                    className="text-center font-semibold"
+                    style={{ color: colors.primary }}
+                  >
                     View Details
                   </Text>
                 </TouchableOpacity>
               </TouchableOpacity>
             ))}
-
-            {/* Empty State for No Trips */}
-            {myTrips.length === 0 && (
-              <View className="items-center py-10">
-                <View className="w-16 h-16 bg-gray-100 rounded-2xl items-center justify-center mb-4">
-                  <Feather name="map" size={24} color="#9CA3AF" />
-                </View>
-                <Text className="text-gray-900 font-semibold text-lg mb-2">
-                  No trips yet
-                </Text>
-                <Text className="text-gray-500 text-sm text-center">
-                  Create your first Cebu adventure with AI
-                </Text>
-              </View>
-            )}
           </View>
         )}
 
         {/* SAVED PLANS */}
         {activeTab === "saved" && (
           <View className="px-5 mt-6">
-            <Text className="text-lg font-black text-gray-900 mb-4">
+            <Text
+              className="text-lg font-bold mb-4"
+              style={{ color: colors.text }}
+            >
               Saved Plans
             </Text>
 
             <View className="items-center py-10">
-              <View className="w-16 h-16 bg-gray-100 rounded-2xl items-center justify-center mb-4">
-                <Feather name="bookmark" size={24} color="#9CA3AF" />
+              <View
+                className="w-16 h-16 rounded-xl items-center justify-center mb-4"
+                style={{ backgroundColor: colors.light }}
+              >
+                <Feather name="bookmark" size={24} color={colors.primary} />
               </View>
-              <Text className="text-gray-900 font-semibold text-lg mb-2">
+              <Text
+                className="font-semibold text-lg mb-2"
+                style={{ color: colors.text }}
+              >
                 No saved plans
               </Text>
-              <Text className="text-gray-500 text-sm text-center">
+              <Text
+                className="text-sm text-center"
+                style={{ color: colors.muted }}
+              >
                 Save AI plans you like for later
               </Text>
             </View>
           </View>
         )}
       </ScrollView>
-    </SafeAreaWrapper>
+    </ScreenWrapper>
   );
 }

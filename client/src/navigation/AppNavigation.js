@@ -22,7 +22,9 @@ function TabNavigation() {
   return (
     <Tab.Navigator
       tabBar={(props) => <BottomNavbar {...props} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+      }}
     >
       <Tab.Screen name="home" component={Home} />
       <Tab.Screen name="discover" component={Discover} />

@@ -7,12 +7,23 @@ import { useNavigation } from "@react-navigation/native";
 export default function Profile() {
   const navigation = useNavigation();
 
-  // User travel stats - Core to SugVoyage!
+  const colors = {
+    primary: "#06b6d4",
+    secondary: "#22d3ee",
+    accent: "#67e8f9",
+    light: "#f0fdff",
+    background: "#ffffff",
+    border: "#cffafe",
+    text: "#164e63",
+    muted: "#0e7490",
+  };
+
+  // User travel stats
   const userStats = [
-    { label: "Trips", value: "12", icon: "map", color: "#3b82f6" },
-    { label: "Places", value: "28", icon: "check-circle", color: "#10b981" },
-    { label: "Badges", value: "8", icon: "award", color: "#f59e0b" },
-    { label: "Days", value: "45", icon: "calendar", color: "#8b5cf6" },
+    { label: "Trips", value: "12", icon: "map" },
+    { label: "Places", value: "28", icon: "check-circle" },
+    { label: "Badges", value: "8", icon: "award" },
+    { label: "Days", value: "45", icon: "calendar" },
   ];
 
   // Cebu-specific achievements
@@ -68,29 +79,32 @@ export default function Profile() {
       place: "Magellan's Cross",
       date: "Yesterday",
       icon: "check-circle",
-      color: "#10b981",
     },
     {
       type: "planned",
       place: "Bantayan Island Trip",
       date: "2 days ago",
       icon: "map",
-      color: "#3b82f6",
     },
     {
       type: "identified",
       place: "Temple of Leah",
       date: "3 days ago",
       icon: "camera",
-      color: "#8b5cf6",
     },
     {
       type: "shared",
       place: "Kawasan Falls Experience",
       date: "1 week ago",
       icon: "share-2",
-      color: "#f59e0b",
     },
+  ];
+
+  const quickActions = [
+    { icon: "edit-3", label: "Edit Profile" },
+    { icon: "share-2", label: "Share Story" },
+    { icon: "map", label: "My Trips" },
+    { icon: "camera", label: "Travel Photos" },
   ];
 
   return (
@@ -98,18 +112,20 @@ export default function Profile() {
       {/* Clean Header */}
       <View className="bg-white px-5 pt-4 pb-4 border-b border-gray-200">
         <View className="flex-row justify-between items-center">
-          <Text className="text-2xl font-bold text-gray-900">My Profile</Text>
+          <Text className="text-2xl font-bold" style={{ color: colors.text }}>
+            My Profile
+          </Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("settings")}
             className="p-2"
           >
-            <Feather name="settings" size={20} color="#6b7280" />
+            <Feather name="settings" size={20} color={colors.muted} />
           </TouchableOpacity>
         </View>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-        {/* Profile Header - Focus on Travel Identity */}
+        {/* Profile Header */}
         <View className="bg-white px-5 py-6 mb-4">
           <View className="flex-row items-center mb-6">
             <View className="relative">
@@ -119,23 +135,35 @@ export default function Profile() {
                 }}
                 className="w-20 h-20 rounded-2xl"
               />
-              <View className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full items-center justify-center border-2 border-white">
+              <View
+                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full items-center justify-center border-2 border-white"
+                style={{ backgroundColor: colors.primary }}
+              >
                 <Feather name="map-pin" size={10} color="#FFFFFF" />
               </View>
             </View>
 
             <View className="ml-4 flex-1">
-              <Text className="text-xl font-bold text-gray-900">
+              <Text
+                className="text-xl font-bold"
+                style={{ color: colors.text }}
+              >
                 Hanz Christian Angelo
               </Text>
-              <Text className="text-gray-500 text-sm mt-1">
+              <Text className="text-sm mt-1" style={{ color: colors.muted }}>
                 🗺️ Exploring Cebu • 🌴 45 days in paradise
               </Text>
 
               <View className="flex-row items-center mt-2">
-                <View className="flex-row items-center bg-blue-50 px-3 py-1 rounded-full">
-                  <Feather name="award" size={14} color="#3b82f6" />
-                  <Text className="text-blue-700 text-sm font-medium ml-1">
+                <View
+                  className="flex-row items-center px-3 py-1 rounded-full"
+                  style={{ backgroundColor: colors.light }}
+                >
+                  <Feather name="award" size={14} color={colors.primary} />
+                  <Text
+                    className="text-sm font-medium ml-1"
+                    style={{ color: colors.primary }}
+                  >
                     Cebu Expert Level 3
                   </Text>
                 </View>
@@ -143,20 +171,29 @@ export default function Profile() {
             </View>
           </View>
 
-          {/* Stats Grid - Clean & Travel-focused */}
-          <View className="flex-row justify-between bg-gray-50 rounded-2xl p-4">
+          {/* Stats Grid */}
+          <View
+            className="flex-row justify-between rounded-xl p-4"
+            style={{ backgroundColor: colors.light }}
+          >
             {userStats.map((stat, index) => (
               <View key={index} className="items-center flex-1">
                 <View
-                  className="w-12 h-12 rounded-2xl items-center justify-center mb-2"
-                  style={{ backgroundColor: `${stat.color}15` }}
+                  className="w-12 h-12 rounded-xl items-center justify-center mb-2"
+                  style={{ backgroundColor: colors.background }}
                 >
-                  <Feather name={stat.icon} size={20} color={stat.color} />
+                  <Feather name={stat.icon} size={20} color={colors.primary} />
                 </View>
-                <Text className="text-lg font-bold text-gray-900">
+                <Text
+                  className="text-lg font-bold"
+                  style={{ color: colors.text }}
+                >
                   {stat.value}
                 </Text>
-                <Text className="text-gray-500 text-xs text-center">
+                <Text
+                  className="text-xs text-center"
+                  style={{ color: colors.muted }}
+                >
                   {stat.label}
                 </Text>
               </View>
@@ -164,44 +201,56 @@ export default function Profile() {
           </View>
         </View>
 
-        {/* Cebu Achievements - Core Feature! */}
+        {/* Cebu Achievements */}
         <View className="bg-white px-5 py-5 mb-4">
           <View className="flex-row justify-between items-center mb-4">
             <View>
-              <Text className="text-lg font-bold text-gray-900">
+              <Text
+                className="text-lg font-bold"
+                style={{ color: colors.text }}
+              >
                 Cebu Achievements
               </Text>
-              <Text className="text-gray-500 text-sm">
+              <Text className="text-sm" style={{ color: colors.muted }}>
                 Unlock badges by exploring Cebu
               </Text>
             </View>
-            <TouchableOpacity className="bg-gray-100 px-3 py-1 rounded-full">
-              <Text className="text-gray-700 text-sm font-medium">
+            <View
+              className="px-3 py-1 rounded-full"
+              style={{ backgroundColor: colors.light }}
+            >
+              <Text
+                className="text-sm font-medium"
+                style={{ color: colors.text }}
+              >
                 {cebuAchievements.filter((a) => a.earned).length}/
                 {cebuAchievements.length}
               </Text>
-            </TouchableOpacity>
+            </View>
           </View>
 
           <View className="flex-row flex-wrap justify-between">
             {cebuAchievements.map((achievement, index) => (
               <View key={index} className="w-[48%] mb-4">
                 <View
-                  className={`p-4 rounded-2xl ${
-                    achievement.earned
-                      ? "bg-yellow-50 border border-yellow-200"
-                      : "bg-gray-50"
+                  className={`p-4 rounded-xl border ${
+                    achievement.earned ? "border-cyan-200" : "border-gray-200"
                   }`}
+                  style={{
+                    backgroundColor: achievement.earned
+                      ? colors.light
+                      : "#f9fafb",
+                  }}
                 >
                   <View
                     className={`w-12 h-12 rounded-xl items-center justify-center mb-3 ${
-                      achievement.earned ? "bg-yellow-100" : "bg-gray-200"
+                      achievement.earned ? "bg-cyan-100" : "bg-gray-100"
                     }`}
                   >
                     <Feather
                       name={achievement.icon}
                       size={20}
-                      color={achievement.earned ? "#f59e0b" : "#9ca3af"}
+                      color={achievement.earned ? colors.primary : colors.muted}
                     />
                   </View>
                   <Text
@@ -211,21 +260,28 @@ export default function Profile() {
                   >
                     {achievement.name}
                   </Text>
-                  <Text className="text-gray-500 text-xs mb-2">
+                  <Text
+                    className="text-xs mb-2"
+                    style={{ color: colors.muted }}
+                  >
                     {achievement.description}
                   </Text>
                   <View className="flex-row justify-between items-center">
                     <Text
                       className={`text-xs font-medium ${
-                        achievement.earned ? "text-green-600" : "text-gray-400"
+                        achievement.earned ? "text-cyan-600" : "text-gray-400"
                       }`}
                     >
                       {achievement.progress}
                     </Text>
                     {achievement.earned ? (
-                      <Feather name="check-circle" size={14} color="#10b981" />
+                      <Feather
+                        name="check-circle"
+                        size={14}
+                        color={colors.primary}
+                      />
                     ) : (
-                      <Feather name="lock" size={14} color="#9ca3af" />
+                      <Feather name="lock" size={14} color={colors.muted} />
                     )}
                   </View>
                 </View>
@@ -238,15 +294,21 @@ export default function Profile() {
         <View className="bg-white px-5 py-5 mb-4">
           <View className="flex-row justify-between items-center mb-4">
             <View>
-              <Text className="text-lg font-bold text-gray-900">
+              <Text
+                className="text-lg font-bold"
+                style={{ color: colors.text }}
+              >
                 Recent Adventures
               </Text>
-              <Text className="text-gray-500 text-sm">
+              <Text className="text-sm" style={{ color: colors.muted }}>
                 Your Cebu journey highlights
               </Text>
             </View>
             <TouchableOpacity>
-              <Text className="text-blue-500 text-sm font-medium">
+              <Text
+                className="text-sm font-medium"
+                style={{ color: colors.primary }}
+              >
                 View All
               </Text>
             </TouchableOpacity>
@@ -256,45 +318,34 @@ export default function Profile() {
             {recentActivities.map((activity, index) => (
               <View
                 key={index}
-                className="flex-row items-center bg-gray-50 rounded-2xl p-4"
+                className="flex-row items-center rounded-xl p-4"
+                style={{ backgroundColor: colors.light }}
               >
                 <View
                   className="w-10 h-10 rounded-xl items-center justify-center mr-3"
-                  style={{ backgroundColor: `${activity.color}15` }}
+                  style={{ backgroundColor: colors.background }}
                 >
                   <Feather
                     name={activity.icon}
                     size={18}
-                    color={activity.color}
+                    color={colors.primary}
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="text-gray-900 font-medium">
+                  <Text className="font-medium" style={{ color: colors.text }}>
                     {activity.place}
                   </Text>
-                  <Text className="text-gray-500 text-sm">{activity.date}</Text>
+                  <Text className="text-sm" style={{ color: colors.muted }}>
+                    {activity.date}
+                  </Text>
                 </View>
                 <View
-                  className={`px-3 py-1 rounded-full ${
-                    activity.type === "visited"
-                      ? "bg-green-100"
-                      : activity.type === "planned"
-                        ? "bg-blue-100"
-                        : activity.type === "identified"
-                          ? "bg-purple-100"
-                          : "bg-yellow-100"
-                  }`}
+                  className="px-3 py-1 rounded-full"
+                  style={{ backgroundColor: colors.background }}
                 >
                   <Text
-                    className={`text-xs font-medium ${
-                      activity.type === "visited"
-                        ? "text-green-800"
-                        : activity.type === "planned"
-                          ? "text-blue-800"
-                          : activity.type === "identified"
-                            ? "text-purple-800"
-                            : "text-yellow-800"
-                    }`}
+                    className="text-xs font-medium"
+                    style={{ color: colors.text }}
                   >
                     {activity.type}
                   </Text>
@@ -306,29 +357,33 @@ export default function Profile() {
 
         {/* Quick Actions */}
         <View className="bg-white px-5 py-5 mb-4">
-          <Text className="text-lg font-bold text-gray-900 mb-4">
+          <Text
+            className="text-lg font-bold mb-4"
+            style={{ color: colors.text }}
+          >
             Quick Actions
           </Text>
           <View className="flex-row flex-wrap justify-between">
-            {[
-              { icon: "edit-3", label: "Edit Profile", color: "#3b82f6" },
-              { icon: "share-2", label: "Share Story", color: "#f59e0b" },
-              { icon: "map", label: "My Trips", color: "#10b981" },
-              { icon: "camera", label: "Travel Photos", color: "#8b5cf6" },
-            ].map((action, index) => (
+            {quickActions.map((action, index) => (
               <TouchableOpacity key={index} className="w-[48%] mb-3">
-                <View className="flex-row items-center bg-gray-50 rounded-2xl p-4">
+                <View
+                  className="flex-row items-center rounded-xl p-4"
+                  style={{ backgroundColor: colors.light }}
+                >
                   <View
                     className="w-10 h-10 rounded-xl items-center justify-center mr-3"
-                    style={{ backgroundColor: `${action.color}15` }}
+                    style={{ backgroundColor: colors.background }}
                   >
                     <Feather
                       name={action.icon}
                       size={18}
-                      color={action.color}
+                      color={colors.primary}
                     />
                   </View>
-                  <Text className="text-gray-900 font-medium text-sm">
+                  <Text
+                    className="font-medium text-sm"
+                    style={{ color: colors.text }}
+                  >
                     {action.label}
                   </Text>
                 </View>
@@ -339,8 +394,10 @@ export default function Profile() {
 
         {/* App Version */}
         <View className="items-center py-6">
-          <Text className="text-gray-400 text-sm">SugVoyage v1.0.0</Text>
-          <Text className="text-gray-400 text-xs mt-1">
+          <Text className="text-sm" style={{ color: colors.muted }}>
+            SugVoyage v1.0.0
+          </Text>
+          <Text className="text-xs mt-1" style={{ color: colors.muted }}>
             Exploring Cebu, One Adventure at a Time 🌴
           </Text>
         </View>

@@ -1,19 +1,19 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context"; // ← ADD THIS
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function BottomNavbar({ state, navigation }) {
-  const insets = useSafeAreaInsets(); // ← ADD THIS
+  const insets = useSafeAreaInsets();
 
   const activeTab = state.routes[state.index].name;
 
   const tabs = [
-    { id: "home", icon: "home", label: "Home" },
-    { id: "discover", icon: "compass", label: "Discover" },
-    { id: "ai", icon: "message-circle", label: "AI" },
-    { id: "trips", icon: "map", label: "Trips" },
-    { id: "flights", icon: "airplay", label: "Flights" },
+    { id: "home", icon: "home" },
+    { id: "discover", icon: "compass" },
+    { id: "ai", icon: "message-circle" },
+    { id: "trips", icon: "map" },
+    { id: "flights", icon: "airplay" },
   ];
 
   const handleTabPress = (tabName) => {
@@ -30,54 +30,67 @@ function BottomNavbar({ state, navigation }) {
 
   return (
     <View
-      className="flex-row bg-white border-t border-slate-200 px-2 py-3"
-      style={{ paddingBottom: insets.bottom }}
+      className="absolute bottom-0 left-0 right-0 px-3"
+      style={{
+        paddingBottom: insets.bottom + 10,
+        backgroundColor: "transparent",
+      }}
+      pointerEvents="box-none"
     >
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-        const isAITab = tab.id === "ai";
+      <View
+        className="flex-row bg-white rounded-full px-4 py-2"
+        style={{
+          shadowColor: "#06b6d4",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.2,
+          shadowRadius: 16,
+          elevation: 10,
+          borderWidth: 1,
+          borderColor: "#cffafe",
+        }}
+      >
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          const isAITab = tab.id === "ai";
 
-        return (
-          <TouchableOpacity
-            key={tab.id}
-            onPress={() => handleTabPress(tab.id)}
-            className="flex-1 items-center justify-center"
-          >
-            <View
-              className={`items-center justify-center rounded-full ${
-                isAITab
-                  ? !isActive
-                    ? "bg-teal-600 w-12 h-12 rounded-full"
-                    : ""
-                  : isActive
-                    ? "bg-teal-50 w-10 h-10"
-                    : "w-10 h-10"
-              }`}
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              onPress={() => handleTabPress(tab.id)}
+              className="flex-1 items-center justify-center"
             >
-              <Feather
-                name={tab.icon}
-                size={isAITab ? 26 : 24}
-                color={
-                  isAITab
-                    ? !isActive
-                      ? "#ffff"
-                      : ""
-                    : isActive
-                      ? "#0f766e"
-                      : "#64748b"
-                }
-              />
-            </View>
-            <Text
-              className={`text-xs mt-1 ${
-                isActive ? "text-teal-700 font-semibold" : "text-slate-500"
-              } ${isAITab ? "font-bold" : ""}`}
-            >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
+              <View
+                className={`items-center justify-center rounded-full ${
+                  isAITab ? "w-12 h-12" : "w-10 h-10"
+                }`}
+                style={{
+                  backgroundColor: isActive
+                    ? isAITab
+                      ? "#06b6d4"
+                      : "#f0fdff"
+                    : isAITab
+                      ? "#06b6d4"
+                      : "transparent",
+                }}
+              >
+                <Feather
+                  name={tab.icon}
+                  size={isAITab ? 22 : 20}
+                  color={
+                    isActive
+                      ? isAITab
+                        ? "#ffffff"
+                        : "#06b6d4"
+                      : isAITab
+                        ? "#ffffff"
+                        : "#64748b"
+                  }
+                />
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </View>
   );
 }

@@ -5,28 +5,40 @@ import { useNavigation } from "@react-navigation/native";
 
 export default function MainHeader() {
   const navigation = useNavigation();
+
   return (
-    <View className="px-5 pt-3 pb-4">
-      <View className="flex-row justify-between items-center mb-1">
-        <View>
-          <Text className="text-2xl font-black text-gray-900">SugVoyage</Text>
-          <Text className="text-emerald-600 text-sm font-medium">
-            Cebu Travel Companion
-          </Text>
+    <View
+      className="px-4 py-3 rounded-2xl mx-4 mt-2"
+      style={{ backgroundColor: "#06b6d4" }}
+    >
+      <View className="flex-row justify-between items-center">
+        <View className="flex-row items-center">
+          <View className="w-8 h-8 rounded-full bg-white mr-3 items-center justify-center">
+            <Feather name="user" size={16} color="#06b6d4" />
+          </View>
+          <View>
+            <Text className="text-white text-sm font-semibold">
+              Welcome back!
+            </Text>
+            <Text className="text-white text-xs opacity-90">Hanz</Text>
+          </View>
         </View>
-        <View className="flex-row gap-3">
-          <TouchableOpacity className="bg-gray-100 p-2 rounded-xl">
-            <Feather name="search" size={20} color="#374151" />
+
+        <View className="flex-row gap-2">
+          <TouchableOpacity className="w-7 h-7 items-center justify-center">
+            <Feather name="bell" size={16} color="white" />
+          </TouchableOpacity>
+          <TouchableOpacity className="w-7 h-7 items-center justify-center">
+            <Feather name="search" size={16} color="white" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate("profile")}
-            className="bg-gray-100 p-2 rounded-xl"
+            className="w-7 h-7 items-center justify-center"
           >
-            <Feather name="user" size={20} color="#374151" />
+            <Feather name="menu" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </View>
-      <Text className="text-gray-500 text-sm">Discover Cebu's hidden gems</Text>
     </View>
   );
 }
