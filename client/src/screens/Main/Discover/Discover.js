@@ -180,7 +180,7 @@ export default function Discover() {
         height: 160, // Fixed height for consistent layout
       }}
       onPress={() =>
-        navigation.navigate("detailed-info", { spot: destination })
+        navigation.navigate("detailed-info", { spotId: destination._id })
       }
     >
       {/* Image Container - Left Side */}
@@ -287,6 +287,7 @@ export default function Discover() {
       </View>
     </TouchableOpacity>
   );
+
   // Empty State Component
   const EmptyState = () => (
     <View className="items-center justify-center py-12 px-4">

@@ -236,6 +236,7 @@ const LiveStatus = () => {
 
   const statusItems = [
     {
+      id: "weather", // Add unique id
       icon: "sun",
       title: "Weather",
       subtitle: "32°C • Sunny",
@@ -244,6 +245,7 @@ const LiveStatus = () => {
       detail: "Ideal for beaches",
     },
     {
+      id: "traffic", // Add unique id
       icon: "trending-up",
       title: "Traffic",
       subtitle: "Light • 15min",
@@ -252,6 +254,7 @@ const LiveStatus = () => {
       detail: "Clear to city center",
     },
     {
+      id: "crowds", // Add unique id
       icon: "users",
       title: "Crowds",
       subtitle: "Moderate",
@@ -260,6 +263,7 @@ const LiveStatus = () => {
       detail: "Peak: 11AM-2PM",
     },
     {
+      id: "best-time", // Add unique id
       icon: "clock",
       title: "Best Time",
       subtitle: "3-5PM",
@@ -295,9 +299,9 @@ const LiveStatus = () => {
       </View>
 
       <View className="flex-row justify-between">
-        {statusItems.map((item, index) => (
+        {statusItems.map((item) => (
           <TouchableOpacity
-            key={index}
+            key={item.id} // Use the unique id here
             className="items-center active:scale-95"
           >
             <View

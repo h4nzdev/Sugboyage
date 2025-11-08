@@ -62,7 +62,7 @@ const MapSection = ({ spots, onSpotPress }) => {
     if (!userLocation) return null;
 
     return (
-      <>
+      <React.Fragment key="user-location-radius">
         {/* Main radius circle */}
         <Circle
           center={userLocation}
@@ -80,8 +80,14 @@ const MapSection = ({ spots, onSpotPress }) => {
           strokeColor={colors.primary}
           fillColor="rgba(220, 20, 60, 0.2)"
         />
-      </>
+      </React.Fragment>
     );
+  };
+
+  // Create unique keys for spots
+  const getUniqueSpotKey = (spot, index) => {
+    // Use a combination of id, coordinates, and index to ensure uniqueness
+    return `spot-${spot.id}-${spot.latitude}-${spot.longitude}-${index}`;
   };
 
   return (
@@ -108,24 +114,18 @@ const MapSection = ({ spots, onSpotPress }) => {
           showsUserLocation={true}
           showsMyLocationButton={true}
         >
-          <UserLocationRadius />
-          {spots.map((spot) => (
+          <UserLocationRadius key="user-radius-component" />
+          {spots.map((spot, index) => (
             <Marker
-              key={spot.id}
+              key={getUniqueSpotKey(spot, index)}
               coordinate={{
                 latitude: spot.latitude,
                 longitude: spot.longitude,
               }}
-              title={spot.name}
+              pinColor={"#dc2626"}
+              tracksViewChanges={false}
               onPress={() => onSpotPress(spot)}
-            >
-              <View
-                className="w-8 h-8 rounded-full border-2 border-white items-center justify-center shadow-lg"
-                style={{ backgroundColor: colors.primary }}
-              >
-                <Feather name="map-pin" size={14} color="white" />
-              </View>
-            </Marker>
+            />
           ))}
         </MapView>
       </View>
