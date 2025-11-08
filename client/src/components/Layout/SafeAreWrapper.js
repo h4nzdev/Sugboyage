@@ -1,5 +1,6 @@
 // components/Layout/SafeAreaWrapper.js
 import { SafeAreaView } from "react-native-safe-area-context";
+import AIIcon from "../AIIcon";
 
 export const SafeAreaWrapper = ({
   children,
@@ -9,6 +10,7 @@ export const SafeAreaWrapper = ({
   return (
     <SafeAreaView className={`flex-1 bg-white ${className}`} edges={edges}>
       {children}
+      <AIIcon />
     </SafeAreaView>
   );
 };

@@ -16,6 +16,7 @@
     "babel-preset-expo": "^54.0.6",
     "expo": "~54.0.20",
     "expo-image-picker": "~17.0.8",
+    "expo-location": "~19.0.7",
     "expo-status-bar": "~3.0.8",
     "expo-updates": "~29.0.12",
     "nativewind": "^4.2.1",

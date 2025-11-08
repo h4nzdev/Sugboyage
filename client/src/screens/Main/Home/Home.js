@@ -3,350 +3,395 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Animated,
+  Dimensions,
   ImageBackground,
 } from "react-native";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Feather } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker, Circle } from "react-native-maps";
-import MainHeader from "../../../components/Header/MainHeader";
-import { SafeAreaWrapper } from "../../../components/Layout/SafeAreWrapper";
 import { ScreenWrapper } from "../../../components/Layout/ScreenWrapper";
+import { CebuSpotsService } from "../../../services/cebuSpotService";
+import MapSection from "./MapSection";
+import { colors } from "../../../utils/colors";
+import cebu from "../../../../assets/homepage_photos/cebu.png";
+import MainHeader from "../../../components/Header/MainHeader";
+import { useNavigation } from "@react-navigation/native";
 
+const { width } = Dimensions.get("window");
+
+// Original categories
+const categories = [
+  { name: "All" },
+  { name: "Cultural" },
+  { name: "Historical" },
+  { name: "Adventure" },
+  { name: "Beach" },
+];
+
+// Hero Banner Component with Image
+const HeroBanner = () => {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={{ opacity: fadeAnim }}
+      className="mx-4 mt-4 mb-4 rounded-3xl overflow-hidden"
+    >
+      <ImageBackground
+        source={cebu}
+        className="bg-gradient-to-b from-blue-400 to-blue-600 h-48 relative"
+      >
+        {/* Overlay gradient for text readability */}
+        <View className="absolute inset-0 bg-black/20" />
+        {/* Content */}
+        <View className="flex-1 justify-end p-5">
+          <Text className="text-white text-3xl font-bold mb-1">
+            Cebu, Philippines
+          </Text>
+          <View className="flex-row items-center">
+            <Feather name="map-pin" size={14} color="white" />
+            <Text className="text-white/90 text-sm ml-1">
+              Explore beautiful destinations
+            </Text>
+          </View>
+        </View>
+      </ImageBackground>
+    </Animated.View>
+  );
+};
+
+// Category Tabs Component (Original with consistent sizing)
+const CategoryTabs = ({ selectedCategory, onCategorySelect }) => {
+  return (
+    <View className="mb-5">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 6 }}
+      >
+        {categories.map((category, index) => (
+          <TouchableOpacity
+            key={index}
+            className={`items-center justify-center rounded-xl ${
+              selectedCategory === category.name
+                ? "bg-red-600"
+                : "bg-white border border-gray-200"
+            } active:scale-95`}
+            style={{
+              width: 100,
+              height: 40,
+            }}
+            onPress={() => onCategorySelect(category.name)}
+          >
+            <Text
+              className={`text-md font-semibold text-center ${
+                selectedCategory === category.name
+                  ? "text-white"
+                  : "text-gray-700"
+              }`}
+            >
+              {category.name}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+// Section Header Component
+const SectionHeader = ({ title, actionText, onActionPress }) => {
+  return (
+    <View className="flex-row items-center justify-between px-4 mb-3">
+      <Text className="text-xl font-bold text-gray-900">{title}</Text>
+      {actionText && (
+        <TouchableOpacity
+          onPress={onActionPress}
+          className="flex-row items-center"
+        >
+          <Text
+            className="text-sm font-semibold mr-1"
+            style={{ color: colors.primary }}
+          >
+            {actionText}
+          </Text>
+          <Feather name="chevron-right" size={16} color={colors.primary} />
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+// Empty State Component
+const EmptyState = () => {
+  return (
+    <View className="items-center justify-center py-12 px-4">
+      <View className="w-20 h-20 rounded-full bg-red-50 items-center justify-center mb-4">
+        <Feather name="map-pin" size={32} color={colors.primary} />
+      </View>
+      <Text className="text-lg font-bold text-gray-800 mb-2">
+        No Attractions Available
+      </Text>
+      <Text className="text-sm text-gray-500 text-center">
+        There are no attractions in this category yet. Try selecting a different
+        category.
+      </Text>
+    </View>
+  );
+};
+
+// Attraction List Cards
+const AttractionList = ({ spots, onSpotPress }) => {
+  if (spots.length === 0) {
+    return (
+      <View className="mb-6">
+        <SectionHeader title="Popular Attractions" />
+        <EmptyState />
+      </View>
+    );
+  }
+
+  return (
+    <View className="mb-6">
+      <SectionHeader
+        title="Popular Attractions"
+        actionText="See all"
+        onActionPress={() => console.log("See all attractions")}
+      />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
+      >
+        {spots.map((spot, index) => (
+          <TouchableOpacity
+            key={spot.id}
+            className="bg-white rounded-2xl overflow-hidden w-72 shadow-md active:scale-95"
+            onPress={() => onSpotPress(spot)}
+          >
+            {/* Image section with gradient */}
+            <View
+              className="h-40 justify-end p-4"
+              style={{
+                backgroundColor:
+                  index % 3 === 0
+                    ? "#5C6BC0"
+                    : index % 3 === 1
+                      ? "#26A69A"
+                      : "#FF7043",
+              }}
+            >
+              <View className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            </View>
+
+            {/* Content section */}
+            <View className="p-4">
+              <Text className="text-base font-bold text-gray-900 mb-1">
+                {spot.name}
+              </Text>
+              <View className="flex-row items-center mb-2">
+                <Feather name="map-pin" size={12} color={colors.muted} />
+                <Text className="text-xs text-gray-500 ml-1">
+                  {spot.location}
+                </Text>
+              </View>
+              <Text className="text-sm text-gray-600 mb-3" numberOfLines={2}>
+                {spot.description}
+              </Text>
+              <View className="flex-row items-center justify-between">
+                <View className="flex-row items-center">
+                  <Feather name="star" size={14} color="#F59E0B" />
+                  <Text className="text-sm font-bold text-gray-800 ml-1">
+                    {spot.rating}
+                  </Text>
+                  <Text className="text-xs text-gray-500 ml-1">
+                    ({spot.reviews})
+                  </Text>
+                </View>
+                <View className="bg-red-600 px-2 py-1 rounded-full">
+                  <Text className="text-white text-xs font-bold">
+                    {spot.distance}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+};
+
+// Live Status Component (Replaces Quick Actions)
+const LiveStatus = () => {
+  const navigation = useNavigation();
+
+  const statusItems = [
+    {
+      icon: "sun",
+      title: "Weather",
+      subtitle: "32°C • Sunny",
+      status: "perfect",
+      color: "#F59E0B",
+      detail: "Ideal for beaches",
+    },
+    {
+      icon: "trending-up",
+      title: "Traffic",
+      subtitle: "Light • 15min",
+      status: "good",
+      color: "#059669",
+      detail: "Clear to city center",
+    },
+    {
+      icon: "users",
+      title: "Crowds",
+      subtitle: "Moderate",
+      status: "moderate",
+      color: "#D97706",
+      detail: "Peak: 11AM-2PM",
+    },
+    {
+      icon: "clock",
+      title: "Best Time",
+      subtitle: "3-5PM",
+      status: "recommended",
+      color: "#7C3AED",
+      detail: "Golden hour photos",
+    },
+  ];
+
+  const getStatusColor = (status) => {
+    const colors = {
+      perfect: "#10B981",
+      good: "#059669",
+      moderate: "#F59E0B",
+      recommended: "#8B5CF6",
+    };
+    return colors[status] || "#6B7280";
+  };
+
+  return (
+    <View className="px-4 mb-8">
+      <View className="flex-row items-center justify-between mb-4">
+        <View className="flex-row items-center">
+          <Feather name="activity" size={20} color={colors.primary} />
+          <Text className="text-xl font-bold text-gray-800 ml-2">
+            Live Status
+          </Text>
+        </View>
+        <View className="flex-row items-center">
+          <View className="w-2 h-2 bg-green-500 rounded-full mr-1" />
+          <Text className="text-green-600 text-xs font-semibold">LIVE</Text>
+        </View>
+      </View>
+
+      <View className="flex-row justify-between">
+        {statusItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            className="items-center active:scale-95"
+          >
+            <View
+              className="w-16 h-16 rounded-2xl items-center justify-center"
+              style={{
+                backgroundColor: `${item.color}15`,
+                borderColor: `${item.color}30`,
+              }}
+            >
+              <Feather name={item.icon} size={24} color={item.color} />
+            </View>
+            <Text className="font-semibold text-gray-800 text-sm text-center mb-1">
+              {item.title}
+            </Text>
+            <Text className="text-gray-500 text-xs text-center">
+              {item.subtitle}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
+      {/* Quick Status Bar */}
+      <View className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-3 mt-3 border border-green-200">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center">
+            <Feather name="check-circle" size={16} color="#059669" />
+            <Text className="text-green-700 text-sm font-semibold ml-2">
+              Perfect day for exploration!
+            </Text>
+          </View>
+          <Text className="text-green-600 text-xs">Updated just now</Text>
+        </View>
+      </View>
+    </View>
+  );
+};
+// Main Home Component
 export default function Home() {
-  const colors = {
-    primary: "#06b6d4",
-    secondary: "#22d3ee",
-    accent: "#67e8f9",
-    light: "#f0fdff",
-    background: "#ffffff",
-    border: "#cffafe",
-    text: "#164e63",
-    muted: "#0e7490",
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [spots, setSpots] = useState([]);
+  const [filteredSpots, setFilteredSpots] = useState([]);
+
+  useEffect(() => {
+    loadSpots();
+  }, []);
+
+  useEffect(() => {
+    filterSpots();
+  }, [selectedCategory, spots]);
+
+  const loadSpots = async () => {
+    try {
+      const spotsData = await CebuSpotsService.getAllCebuSpots();
+      setSpots(spotsData);
+    } catch (error) {
+      console.error("Error loading spots:", error);
+      setSpots(CebuSpotsService.getAllCebuSpots());
+    }
   };
 
-  const popularSpots = [
-    {
-      id: 1,
-      name: "Temple of Leah",
-      latitude: 10.3567,
-      longitude: 123.8756,
-      type: "historical",
-      distance: "15 min",
-      rating: 4.8,
-      image:
-        "https://w5x6j5c9.delivery.rocketcdn.me/wp-content/uploads/2024/06/temple-of-leah-building-front.jpg",
-    },
-    {
-      id: 2,
-      name: "Magellan's Cross",
-      latitude: 10.294,
-      longitude: 123.9022,
-      type: "cultural",
-      distance: "20 min",
-      rating: 4.5,
-      image:
-        "https://w5x6j5c9.delivery.rocketcdn.me/wp-content/uploads/2024/03/magellan-cross-cebu-1024x768.jpg",
-    },
-    {
-      id: 3,
-      name: "Kawasan Falls",
-      latitude: 9.8167,
-      longitude: 123.3833,
-      type: "adventure",
-      distance: "2.5 hrs",
-      rating: 4.9,
-      image:
-        "https://i0.wp.com/kawasanfalls.net/wp-content/uploads/2011/04/kawasan-falls-pana-4.jpg?w=1000&ssl=1",
-    },
-  ];
-
-  const userLocation = {
-    latitude: 10.3157,
-    longitude: 123.8854,
-    latitudeDelta: 0.05,
-    longitudeDelta: 0.05,
+  const filterSpots = () => {
+    if (selectedCategory === "All") {
+      setFilteredSpots(spots);
+    } else {
+      setFilteredSpots(
+        spots.filter(
+          (spot) =>
+            spot.category?.toLowerCase() === selectedCategory.toLowerCase()
+        )
+      );
+    }
   };
 
-  const categories = [
-    { icon: "map-pin", name: "Nearby" },
-    { icon: "coffee", name: "Food" },
-    { icon: "sun", name: "Beach" },
-    { icon: "book", name: "Culture" },
-    { icon: "compass", name: "Adventure" },
-  ];
+  const handleSpotPress = (spot) => {
+    console.log("Spot pressed:", spot.name);
+    // navigation.navigate('LocationDetail', { spot });
+  };
 
   return (
     <ScreenWrapper className="flex-1 bg-gray-50">
-      <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 30 }}
+      >
         <MainHeader />
-
-        {/* Search Bar */}
-        <View className="px-5 mt-2 mb-4">
-          <TouchableOpacity
-            className="bg-white rounded-xl px-4 py-3 flex-row items-center"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
-            }}
-          >
-            <Feather name="search" size={18} color={colors.muted} />
-            <Text className="ml-3 text-sm" style={{ color: colors.muted }}>
-              Search for places, food, activities...
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Location Badge */}
-        <View className="px-5 mb-4">
-          <View className="flex-row items-center">
-            <Feather name="map-pin" size={14} color={colors.primary} />
-            <Text
-              className="text-sm ml-1 font-semibold"
-              style={{ color: colors.text }}
-            >
-              Nearby: Explore what's around you!
-            </Text>
-          </View>
-        </View>
-
-        {/* Category Pills */}
-        <View className="mb-5">
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, gap: 10 }}
-          >
-            {categories.map((category, index) => (
-              <TouchableOpacity
-                key={index}
-                className="bg-white rounded-full px-4 py-2 flex-row items-center"
-                style={{
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 3,
-                  elevation: 2,
-                }}
-              >
-                <Feather
-                  name={category.icon}
-                  size={16}
-                  color={colors.primary}
-                />
-                <Text
-                  className="ml-2 text-sm font-semibold"
-                  style={{ color: colors.text }}
-                >
-                  {category.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Top Attractions Nearby */}
-        <View className="px-5 mb-5">
-          <Text
-            className="text-lg font-bold mb-3"
-            style={{ color: colors.text }}
-          >
-            Top Attractions Nearby
-          </Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 12 }}
-          >
-            {popularSpots.map((spot) => (
-              <TouchableOpacity
-                key={spot.id}
-                className="bg-white rounded-xl overflow-hidden"
-                style={{
-                  width: 140,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.06,
-                  shadowRadius: 8,
-                  elevation: 3,
-                }}
-              >
-                <ImageBackground
-                  source={{ uri: spot.image }}
-                  className="h-32 w-full"
-                />
-                <View className="p-3">
-                  <Text
-                    className="font-semibold text-sm mb-1"
-                    style={{ color: colors.text }}
-                    numberOfLines={1}
-                  >
-                    {spot.name}
-                  </Text>
-                  <Text
-                    className="text-xs mb-1"
-                    style={{ color: colors.muted }}
-                  >
-                    {spot.type}
-                  </Text>
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-xs" style={{ color: colors.muted }}>
-                      {spot.distance}
-                    </Text>
-                    <View className="flex-row items-center">
-                      <Feather name="star" size={10} color={colors.primary} />
-                      <Text
-                        className="text-xs ml-1 font-semibold"
-                        style={{ color: colors.text }}
-                      >
-                        {spot.rating}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Must-Try Cebuano Food */}
-        <View className="px-5 mb-5">
-          <Text
-            className="text-lg font-bold mb-3"
-            style={{ color: colors.text }}
-          >
-            Must-Try Cebuano Food
-          </Text>
-          <View className="flex-row flex-wrap justify-between">
-            <TouchableOpacity
-              className="bg-white rounded-xl overflow-hidden mb-3"
-              style={{
-                width: "48%",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.06,
-                shadowRadius: 8,
-                elevation: 3,
-              }}
-            >
-              <View className="h-24 bg-cyan-100" />
-              <View className="p-3">
-                <Text
-                  className="font-semibold text-sm"
-                  style={{ color: colors.text }}
-                >
-                  Cebu Lechon
-                </Text>
-                <Text className="text-xs" style={{ color: colors.muted }}>
-                  Nilarang Baksal
-                </Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="bg-white rounded-xl overflow-hidden mb-3"
-              style={{
-                width: "48%",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.06,
-                shadowRadius: 8,
-                elevation: 3,
-              }}
-            >
-              <View className="h-24 bg-cyan-100" />
-              <View className="p-3">
-                <Text
-                  className="font-semibold text-sm"
-                  style={{ color: colors.text }}
-                >
-                  Local Delicacy
-                </Text>
-                <Text className="text-xs" style={{ color: colors.muted }}>
-                  Try something new
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Map Section */}
-        <View className="px-5 mb-5">
-          <Text
-            className="text-lg font-bold mb-3"
-            style={{ color: colors.text }}
-          >
-            You Are Here
-          </Text>
-          <View
-            className="bg-white rounded-xl overflow-hidden"
-            style={{
-              height: 180,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.06,
-              shadowRadius: 8,
-              elevation: 3,
-            }}
-          >
-            <MapView
-              style={{ flex: 1 }}
-              initialRegion={userLocation}
-              showsUserLocation={true}
-            >
-              {popularSpots.map((spot) => (
-                <Marker
-                  key={spot.id}
-                  coordinate={{
-                    latitude: spot.latitude,
-                    longitude: spot.longitude,
-                  }}
-                  title={spot.name}
-                >
-                  <View
-                    className="w-6 h-6 rounded-full border-2 border-white items-center justify-center"
-                    style={{ backgroundColor: colors.primary }}
-                  >
-                    <Feather name="map-pin" size={12} color={colors.light} />
-                  </View>
-                </Marker>
-              ))}
-            </MapView>
-          </View>
-        </View>
-
-        {/* Start Exploring CTA */}
-        <View className="px-5 mb-8">
-          <TouchableOpacity
-            className="rounded-xl p-5 flex-row items-center justify-between"
-            style={{
-              backgroundColor: colors.primary,
-              shadowColor: colors.primary,
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.2,
-              shadowRadius: 10,
-              elevation: 5,
-            }}
-          >
-            <View className="flex-1">
-              <Text className="text-white font-bold text-base mb-1">
-                Ready to Explore?
-              </Text>
-              <Text className="text-white text-xs opacity-90">
-                15+ amazing spots waiting for you
-              </Text>
-            </View>
-            <View
-              className="w-10 h-10 rounded-full items-center justify-center"
-              style={{ backgroundColor: colors.light }}
-            >
-              <Feather name="arrow-right" size={18} color={colors.primary} />
-            </View>
-          </TouchableOpacity>
-        </View>
+        <HeroBanner />
+        <CategoryTabs
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
+        />
+        <AttractionList spots={filteredSpots} onSpotPress={handleSpotPress} />
+        <LiveStatus />
+        <MapSection spots={filteredSpots} onSpotPress={handleSpotPress} />
       </ScrollView>
     </ScreenWrapper>
   );

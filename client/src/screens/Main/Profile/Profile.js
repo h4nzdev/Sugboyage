@@ -7,119 +7,110 @@ import { useNavigation } from "@react-navigation/native";
 export default function Profile() {
   const navigation = useNavigation();
 
+  // Colors matching your app theme
   const colors = {
-    primary: "#06b6d4",
-    secondary: "#22d3ee",
-    accent: "#67e8f9",
-    light: "#f0fdff",
-    background: "#ffffff",
-    border: "#cffafe",
-    text: "#164e63",
-    muted: "#0e7490",
+    primary: "#DC143C",
+    secondary: "#FFF8DC",
+    background: "#FFFFFF",
+    text: "#2D3748",
+    muted: "#718096",
+    light: "#F7FAFC",
   };
 
-  // User travel stats
+  // User stats based on docs - Social contributions
   const userStats = [
-    { label: "Trips", value: "12", icon: "map" },
-    { label: "Places", value: "28", icon: "check-circle" },
-    { label: "Badges", value: "8", icon: "award" },
-    { label: "Days", value: "45", icon: "calendar" },
+    { label: "Posts", value: "24", icon: "message-circle" },
+    { label: "Likes", value: "156", icon: "heart" },
+    { label: "Saved", value: "18", icon: "bookmark" },
+    { label: "Spots", value: "32", icon: "map-pin" },
   ];
 
-  // Cebu-specific achievements
-  const cebuAchievements = [
+  // User's posts from Social Feed (based on docs)
+  const userPosts = [
     {
-      name: "Cebu Explorer",
-      icon: "compass",
-      earned: true,
-      description: "Visited 10+ Cebu landmarks",
-      progress: "12/10",
+      id: 1,
+      content:
+        "Just visited Kawasan Falls! The turquoise waters are absolutely breathtaking. The canyoneering adventure was worth every moment! 💦",
+      location: "Kawasan Falls, Badian",
+      likes: 42,
+      comments: 8,
+      timestamp: "2 days ago",
+      image: "🏞️",
     },
     {
-      name: "Lechon Lover",
-      icon: "coffee",
-      earned: true,
-      description: "Tried authentic Cebu lechon",
-      progress: "Complete",
+      id: 2,
+      content:
+        "Cebu's lechon is everything they say and more! The crispy skin and flavorful meat at CNT is a must-try for every food lover. 🍖",
+      location: "CNT Lechon, Mandaue",
+      likes: 28,
+      comments: 5,
+      timestamp: "1 week ago",
+      image: "🍽️",
     },
     {
-      name: "Island Hopper",
-      icon: "umbrella",
-      earned: true,
-      description: "Visited 3 Cebu islands",
-      progress: "4/3",
-    },
-    {
-      name: "Heritage Seeker",
-      icon: "book",
-      earned: false,
-      description: "Explore 5 historical sites",
-      progress: "3/5",
-    },
-    {
-      name: "Waterfall Chaser",
-      icon: "trending-up",
-      earned: true,
-      description: "Visited Kawasan Falls",
-      progress: "Complete",
-    },
-    {
-      name: "Local Expert",
-      icon: "star",
-      earned: false,
-      description: "Complete all Cebu challenges",
-      progress: "5/8",
+      id: 3,
+      content:
+        "Magellan's Cross is such an important historical site. Standing where Christianity was introduced to the Philippines was a moving experience. ✝️",
+      location: "Magellan's Cross, Cebu City",
+      likes: 31,
+      comments: 3,
+      timestamp: "2 weeks ago",
+      image: "⛪",
     },
   ];
 
-  // Recent Cebu activities
-  const recentActivities = [
+  // Saved itineraries from AI Planner (based on docs)
+  const savedItineraries = [
     {
-      type: "visited",
-      place: "Magellan's Cross",
-      date: "Yesterday",
-      icon: "check-circle",
+      id: 1,
+      title: "Cebu Cultural Weekend",
+      duration: "2 days",
+      spots: 6,
+      created: "1 week ago",
     },
     {
-      type: "planned",
-      place: "Bantayan Island Trip",
-      date: "2 days ago",
-      icon: "map",
+      id: 2,
+      title: "Beach & Island Adventure",
+      duration: "3 days",
+      spots: 8,
+      created: "2 weeks ago",
     },
     {
-      type: "identified",
-      place: "Temple of Leah",
-      date: "3 days ago",
-      icon: "camera",
-    },
-    {
-      type: "shared",
-      place: "Kawasan Falls Experience",
-      date: "1 week ago",
-      icon: "share-2",
+      id: 3,
+      title: "Food Tour Experience",
+      duration: "1 day",
+      spots: 5,
+      created: "3 weeks ago",
     },
   ];
 
-  const quickActions = [
-    { icon: "edit-3", label: "Edit Profile" },
-    { icon: "share-2", label: "Share Story" },
-    { icon: "map", label: "My Trips" },
-    { icon: "camera", label: "Travel Photos" },
+  // Settings options based on docs
+  const settingsOptions = [
+    {
+      icon: "map-pin",
+      label: "Radius Settings",
+      description: "Adjust geofencing distance",
+    },
+    { icon: "bell", label: "Notifications", description: "Manage push alerts" },
+    {
+      icon: "user",
+      label: "Account Details",
+      description: "Update profile information",
+    },
+    { icon: "shield", label: "Privacy", description: "Control data sharing" },
   ];
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Clean Header */}
+      {/* Header */}
       <View className="bg-white px-5 pt-4 pb-4 border-b border-gray-200">
         <View className="flex-row justify-between items-center">
-          <Text className="text-2xl font-bold" style={{ color: colors.text }}>
-            My Profile
-          </Text>
+          <Text className="text-2xl font-black text-gray-900">My Profile</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate("settings")}
-            className="p-2"
+            className="p-2 bg-gray-100 rounded-xl"
           >
-            <Feather name="settings" size={20} color={colors.muted} />
+            <Feather name="settings" size={18} color={colors.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -129,276 +120,232 @@ export default function Profile() {
         <View className="bg-white px-5 py-6 mb-4">
           <View className="flex-row items-center mb-6">
             <View className="relative">
-              <Image
-                source={{
-                  uri: "https://res.cloudinary.com/dgnxxyzve/image/upload/v1759290464/medora_uploads/patientPicture-1759290464276.jpg",
-                }}
-                className="w-20 h-20 rounded-2xl"
-              />
-              <View
-                className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full items-center justify-center border-2 border-white"
-                style={{ backgroundColor: colors.primary }}
-              >
-                <Feather name="map-pin" size={10} color="#FFFFFF" />
+              <View className="w-20 h-20 bg-red-100 rounded-2xl items-center justify-center">
+                <Feather name="user" size={32} color={colors.primary} />
+              </View>
+              <View className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-600 rounded-full items-center justify-center border-2 border-white">
+                <Feather name="check" size={12} color="white" />
               </View>
             </View>
 
             <View className="ml-4 flex-1">
-              <Text
-                className="text-xl font-bold"
-                style={{ color: colors.text }}
-              >
-                Hanz Christian Angelo
+              <Text className="text-xl font-black text-gray-900">
+                Hanz Christian
               </Text>
-              <Text className="text-sm mt-1" style={{ color: colors.muted }}>
-                🗺️ Exploring Cebu • 🌴 45 days in paradise
+              <Text className="text-red-600 text-sm font-semibold mt-1">
+                🗺️ Cebu Explorer • 📱 Sugoyage User
               </Text>
 
               <View className="flex-row items-center mt-2">
-                <View
-                  className="flex-row items-center px-3 py-1 rounded-full"
-                  style={{ backgroundColor: colors.light }}
-                >
-                  <Feather name="award" size={14} color={colors.primary} />
-                  <Text
-                    className="text-sm font-medium ml-1"
-                    style={{ color: colors.primary }}
-                  >
-                    Cebu Expert Level 3
+                <View className="bg-red-50 px-3 py-1 rounded-full">
+                  <Text className="text-red-700 text-sm font-semibold">
+                    Community Contributor
                   </Text>
                 </View>
               </View>
             </View>
           </View>
 
-          {/* Stats Grid */}
-          <View
-            className="flex-row justify-between rounded-xl p-4"
-            style={{ backgroundColor: colors.light }}
-          >
-            {userStats.map((stat, index) => (
-              <View key={index} className="items-center flex-1">
-                <View
-                  className="w-12 h-12 rounded-xl items-center justify-center mb-2"
-                  style={{ backgroundColor: colors.background }}
-                >
-                  <Feather name={stat.icon} size={20} color={colors.primary} />
-                </View>
-                <Text
-                  className="text-lg font-bold"
-                  style={{ color: colors.text }}
-                >
-                  {stat.value}
-                </Text>
-                <Text
-                  className="text-xs text-center"
-                  style={{ color: colors.muted }}
-                >
-                  {stat.label}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Cebu Achievements */}
-        <View className="bg-white px-5 py-5 mb-4">
-          <View className="flex-row justify-between items-center mb-4">
-            <View>
-              <Text
-                className="text-lg font-bold"
-                style={{ color: colors.text }}
-              >
-                Cebu Achievements
-              </Text>
-              <Text className="text-sm" style={{ color: colors.muted }}>
-                Unlock badges by exploring Cebu
-              </Text>
-            </View>
-            <View
-              className="px-3 py-1 rounded-full"
-              style={{ backgroundColor: colors.light }}
-            >
-              <Text
-                className="text-sm font-medium"
-                style={{ color: colors.text }}
-              >
-                {cebuAchievements.filter((a) => a.earned).length}/
-                {cebuAchievements.length}
-              </Text>
-            </View>
-          </View>
-
-          <View className="flex-row flex-wrap justify-between">
-            {cebuAchievements.map((achievement, index) => (
-              <View key={index} className="w-[48%] mb-4">
-                <View
-                  className={`p-4 rounded-xl border ${
-                    achievement.earned ? "border-cyan-200" : "border-gray-200"
-                  }`}
-                  style={{
-                    backgroundColor: achievement.earned
-                      ? colors.light
-                      : "#f9fafb",
-                  }}
-                >
-                  <View
-                    className={`w-12 h-12 rounded-xl items-center justify-center mb-3 ${
-                      achievement.earned ? "bg-cyan-100" : "bg-gray-100"
-                    }`}
-                  >
+          {/* Social Stats Grid */}
+          <View className="bg-red-50 rounded-2xl p-4">
+            <Text className="text-gray-900 font-bold text-center mb-3">
+              Community Contributions
+            </Text>
+            <View className="flex-row justify-between">
+              {userStats.map((stat, index) => (
+                <View key={index} className="items-center flex-1">
+                  <View className="w-10 h-10 bg-white rounded-xl items-center justify-center mb-2">
                     <Feather
-                      name={achievement.icon}
-                      size={20}
-                      color={achievement.earned ? colors.primary : colors.muted}
+                      name={stat.icon}
+                      size={18}
+                      color={colors.primary}
                     />
                   </View>
-                  <Text
-                    className={`font-bold text-sm mb-1 ${
-                      achievement.earned ? "text-gray-900" : "text-gray-400"
-                    }`}
-                  >
-                    {achievement.name}
+                  <Text className="text-lg font-black text-gray-900">
+                    {stat.value}
                   </Text>
-                  <Text
-                    className="text-xs mb-2"
-                    style={{ color: colors.muted }}
-                  >
-                    {achievement.description}
+                  <Text className="text-gray-600 text-xs text-center">
+                    {stat.label}
                   </Text>
-                  <View className="flex-row justify-between items-center">
-                    <Text
-                      className={`text-xs font-medium ${
-                        achievement.earned ? "text-cyan-600" : "text-gray-400"
-                      }`}
-                    >
-                      {achievement.progress}
-                    </Text>
-                    {achievement.earned ? (
-                      <Feather
-                        name="check-circle"
-                        size={14}
-                        color={colors.primary}
-                      />
-                    ) : (
-                      <Feather name="lock" size={14} color={colors.muted} />
-                    )}
-                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
         </View>
 
-        {/* Recent Cebu Adventures */}
+        {/* My Posts Section */}
         <View className="bg-white px-5 py-5 mb-4">
           <View className="flex-row justify-between items-center mb-4">
             <View>
-              <Text
-                className="text-lg font-bold"
-                style={{ color: colors.text }}
-              >
-                Recent Adventures
+              <Text className="text-lg font-black text-gray-900">
+                My Community Posts
               </Text>
-              <Text className="text-sm" style={{ color: colors.muted }}>
-                Your Cebu journey highlights
+              <Text className="text-gray-500 text-sm">
+                Shared experiences and feedback
               </Text>
             </View>
             <TouchableOpacity>
-              <Text
-                className="text-sm font-medium"
-                style={{ color: colors.primary }}
-              >
+              <Text className="text-red-600 text-sm font-semibold">
                 View All
               </Text>
             </TouchableOpacity>
           </View>
 
-          <View className="space-y-3">
-            {recentActivities.map((activity, index) => (
+          <View className="gap-3">
+            {userPosts.map((post) => (
               <View
-                key={index}
-                className="flex-row items-center rounded-xl p-4"
-                style={{ backgroundColor: colors.light }}
+                key={post.id}
+                className="bg-gray-50 rounded-2xl p-4 border border-gray-200"
               >
-                <View
-                  className="w-10 h-10 rounded-xl items-center justify-center mr-3"
-                  style={{ backgroundColor: colors.background }}
-                >
-                  <Feather
-                    name={activity.icon}
-                    size={18}
-                    color={colors.primary}
-                  />
+                <View className="flex-row items-start mb-3">
+                  <View className="w-10 h-10 bg-red-100 rounded-xl items-center justify-center mr-3">
+                    <Text className="text-lg">{post.image}</Text>
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-gray-900 font-semibold text-sm mb-1">
+                      {post.location}
+                    </Text>
+                    <Text className="text-gray-600 text-xs">
+                      {post.timestamp}
+                    </Text>
+                  </View>
                 </View>
-                <View className="flex-1">
-                  <Text className="font-medium" style={{ color: colors.text }}>
-                    {activity.place}
-                  </Text>
-                  <Text className="text-sm" style={{ color: colors.muted }}>
-                    {activity.date}
-                  </Text>
-                </View>
-                <View
-                  className="px-3 py-1 rounded-full"
-                  style={{ backgroundColor: colors.background }}
-                >
-                  <Text
-                    className="text-xs font-medium"
-                    style={{ color: colors.text }}
-                  >
-                    {activity.type}
-                  </Text>
+
+                <Text className="text-gray-800 text-sm leading-5 mb-3">
+                  {post.content}
+                </Text>
+
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-4">
+                    <View className="flex-row items-center">
+                      <Feather name="heart" size={14} color={colors.muted} />
+                      <Text className="text-gray-500 text-sm ml-1">
+                        {post.likes}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center">
+                      <Feather
+                        name="message-circle"
+                        size={14}
+                        color={colors.muted}
+                      />
+                      <Text className="text-gray-500 text-sm ml-1">
+                        {post.comments}
+                      </Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity>
+                    <Feather name="edit" size={16} color={colors.muted} />
+                  </TouchableOpacity>
                 </View>
               </View>
             ))}
           </View>
         </View>
 
-        {/* Quick Actions */}
+        {/* Saved Itineraries */}
         <View className="bg-white px-5 py-5 mb-4">
-          <Text
-            className="text-lg font-bold mb-4"
-            style={{ color: colors.text }}
-          >
-            Quick Actions
-          </Text>
-          <View className="flex-row flex-wrap justify-between">
-            {quickActions.map((action, index) => (
-              <TouchableOpacity key={index} className="w-[48%] mb-3">
-                <View
-                  className="flex-row items-center rounded-xl p-4"
-                  style={{ backgroundColor: colors.light }}
-                >
-                  <View
-                    className="w-10 h-10 rounded-xl items-center justify-center mr-3"
-                    style={{ backgroundColor: colors.background }}
-                  >
-                    <Feather
-                      name={action.icon}
-                      size={18}
-                      color={colors.primary}
-                    />
-                  </View>
-                  <Text
-                    className="font-medium text-sm"
-                    style={{ color: colors.text }}
-                  >
-                    {action.label}
+          <View className="flex-row justify-between items-center mb-4">
+            <View>
+              <Text className="text-lg font-black text-gray-900">
+                Saved Itineraries
+              </Text>
+              <Text className="text-gray-500 text-sm">
+                AI-generated travel plans
+              </Text>
+            </View>
+            <TouchableOpacity onPress={() => navigation.navigate("ai")}>
+              <Text className="text-red-600 text-sm font-semibold">
+                Create New
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          <View className="gap-3">
+            {savedItineraries.map((itinerary) => (
+              <TouchableOpacity
+                key={itinerary.id}
+                className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm"
+              >
+                <View className="flex-row items-center justify-between mb-2">
+                  <Text className="font-bold text-gray-900 text-base">
+                    {itinerary.title}
                   </Text>
+                  <View className="bg-red-50 px-2 py-1 rounded-full">
+                    <Text className="text-red-700 text-xs font-semibold">
+                      {itinerary.duration}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex-row items-center gap-4 mb-3">
+                  <View className="flex-row items-center">
+                    <Feather name="map-pin" size={12} color={colors.muted} />
+                    <Text className="text-gray-500 text-xs ml-1">
+                      {itinerary.spots} spots
+                    </Text>
+                  </View>
+                  <View className="flex-row items-center">
+                    <Feather name="calendar" size={12} color={colors.muted} />
+                    <Text className="text-gray-500 text-xs ml-1">
+                      {itinerary.created}
+                    </Text>
+                  </View>
+                </View>
+
+                <View className="flex-row gap-2">
+                  <TouchableOpacity className="flex-1 bg-red-600 py-2 rounded-xl">
+                    <Text className="text-white text-center text-sm font-semibold">
+                      View Plan
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-xl items-center justify-center">
+                    <Feather name="share-2" size={16} color={colors.text} />
+                  </TouchableOpacity>
                 </View>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* App Version */}
-        <View className="items-center py-6">
-          <Text className="text-sm" style={{ color: colors.muted }}>
-            SugVoyage v1.0.0
+        {/* Settings & Preferences */}
+        <View className="bg-white px-5 py-5 mb-4">
+          <Text className="text-lg font-black text-gray-900 mb-4">
+            Settings & Preferences
           </Text>
-          <Text className="text-xs mt-1" style={{ color: colors.muted }}>
-            Exploring Cebu, One Adventure at a Time 🌴
+
+          <View className="gap-2">
+            {settingsOptions.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                className="flex-row items-center p-4 bg-gray-50 rounded-xl"
+              >
+                <View className="w-10 h-10 bg-red-100 rounded-xl items-center justify-center mr-3">
+                  <Feather
+                    name={option.icon}
+                    size={18}
+                    color={colors.primary}
+                  />
+                </View>
+                <View className="flex-1">
+                  <Text className="font-semibold text-gray-900 text-sm">
+                    {option.label}
+                  </Text>
+                  <Text className="text-gray-500 text-xs">
+                    {option.description}
+                  </Text>
+                </View>
+                <Feather name="chevron-right" size={16} color={colors.muted} />
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* App Info */}
+        <View className="items-center py-6">
+          <Text className="text-gray-500 text-sm">Sugoyage v1.0.0</Text>
+          <Text className="text-gray-400 text-xs mt-1">
+            The Smart Traveling Assistant for Cebu
           </Text>
         </View>
       </ScrollView>

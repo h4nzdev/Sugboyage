@@ -7,35 +7,33 @@ export default function MainHeader() {
   const navigation = useNavigation();
 
   return (
-    <View
-      className="px-4 py-3 rounded-2xl mx-4 mt-2"
-      style={{ backgroundColor: "#06b6d4" }}
-    >
+    <View className="px-5 pt-4 pb-3 bg-white border-b border-gray-200">
       <View className="flex-row justify-between items-center">
+        {/* Location & User */}
         <View className="flex-row items-center">
-          <View className="w-8 h-8 rounded-full bg-white mr-3 items-center justify-center">
-            <Feather name="user" size={16} color="#06b6d4" />
-          </View>
-          <View>
-            <Text className="text-white text-sm font-semibold">
-              Welcome back!
+          <View className="mr-3">
+            <View className="flex-row items-center mb-1">
+              <Feather name="map-pin" size={14} color="#DC143C" />
+              <Text className="text-red-600 text-sm font-semibold ml-1">
+                Cebu, Philippines
+              </Text>
+            </View>
+            <Text className="text-gray-900 font-bold text-base">
+              Hello Hanz! 👋
             </Text>
-            <Text className="text-white text-xs opacity-90">Hanz</Text>
           </View>
         </View>
 
+        {/* Actions */}
         <View className="flex-row gap-2">
-          <TouchableOpacity className="w-7 h-7 items-center justify-center">
-            <Feather name="bell" size={16} color="white" />
-          </TouchableOpacity>
-          <TouchableOpacity className="w-7 h-7 items-center justify-center">
-            <Feather name="search" size={16} color="white" />
+          <TouchableOpacity className="w-9 h-9 bg-red-50 rounded-xl items-center justify-center">
+            <Feather name="compass" size={16} color="#DC143C" />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => navigation.navigate("profile")}
-            className="w-7 h-7 items-center justify-center"
+            className="w-9 h-9 bg-red-600 rounded-xl items-center justify-center"
           >
-            <Feather name="menu" size={16} color="white" />
+            <Feather name="user" size={16} color="white" />
           </TouchableOpacity>
         </View>
       </View>

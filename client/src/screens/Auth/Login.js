@@ -3,30 +3,30 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   Alert,
   Animated,
   Keyboard,
+  ImageBackground,
 } from "react-native";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import logo from "../../../assets/logo.png";
 import { useAuth } from "../../context/AuthenticationContext";
 
 export default function Login() {
   const navigation = useNavigation();
-  const { setUser } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
+  const { setUser } = useAuth();
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -123,37 +123,12 @@ export default function Login() {
 
     setIsLoading(true);
     setUser(true);
-
-    // Simulate API call with validation
-    setTimeout(() => {
-      setIsLoading(false);
-
-      // Simple demo validation
-      if (email.toLowerCase() === "traveler@demo.com" || email.includes("@")) {
-        Alert.alert(
-          "Welcome Back! 🌴",
-          `You're all set, ${email.split("@")[0]}! Ready to explore Cebu?`,
-          [
-            {
-              text: "Let's Go!",
-            },
-          ]
-        );
-      } else {
-        shakeAnimation();
-        Alert.alert(
-          "Login Failed",
-          "Invalid credentials. Please try again or use demo credentials.",
-          [{ text: "OK" }]
-        );
-      }
-    }, 1500);
   };
 
   const handleSocialLogin = (provider) => {
     Alert.alert(
       "Coming Soon!",
-      `${provider} login will be available in the next update! 🚀`,
+      `${provider} login will be available soon! 🚀`,
       [{ text: "Got it!" }]
     );
   };
@@ -161,16 +136,13 @@ export default function Login() {
   const handleForgotPassword = () => {
     Alert.alert(
       "Reset Password",
-      "Enter your email to receive password reset instructions",
+      "We'll send reset instructions to your email",
       [
         { text: "Cancel", style: "cancel" },
         {
           text: "Send",
           onPress: () =>
-            Alert.alert(
-              "Success!",
-              "Password reset link sent to your email 📧"
-            ),
+            Alert.alert("Check your email!", "Password reset link sent 📧"),
         },
       ]
     );
@@ -192,25 +164,27 @@ export default function Login() {
               opacity: fadeAnim,
               transform: [{ translateY: slideAnim }],
             }}
+            className="flex-1"
           >
             {/* Header Section */}
             <View className="px-6 pt-8 pb-6">
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
-                className="w-10 h-10 bg-gray-100 rounded-xl items-center justify-center mb-6 active:bg-gray-200"
+                className="w-10 h-10 bg-gray-100 rounded-xl items-center justify-center mb-6"
               >
                 <Feather name="arrow-left" size={20} color="#374151" />
               </TouchableOpacity>
 
               <View className="items-center mb-8">
-                <View className="w-20 h-20 bg-emerald-500 rounded-2xl items-center justify-center mb-4 shadow-lg">
-                  <Feather name="map-pin" size={32} color="#FFFFFF" />
-                </View>
+                <ImageBackground
+                  source={logo}
+                  className="w-20 h-20 bg-red-600 rounded-2xl items-center justify-center mb-4 shadow-lg"
+                />
                 <Text className="text-3xl font-black text-gray-900 mb-2">
                   Welcome Back
                 </Text>
-                <Text className="text-gray-500 text-base text-center px-4">
-                  Continue your Cebu adventure with SugVoyage 🌴
+                <Text className="text-gray-500 text-base text-center">
+                  Continue your Cebu adventure
                 </Text>
               </View>
             </View>
@@ -222,20 +196,18 @@ export default function Login() {
             >
               {/* Email Input */}
               <View className="mb-5">
-                <Text className="text-gray-700 font-semibold mb-2 text-xs tracking-wide">
-                  EMAIL ADDRESS
+                <Text className="text-gray-700 font-semibold mb-2 text-sm">
+                  Email Address
                 </Text>
                 <View
-                  className={`flex-row items-center bg-gray-50 rounded-2xl px-4 py-4 ${
-                    emailError
-                      ? "border-2 border-red-400"
-                      : "border border-gray-200"
+                  className={`flex-row items-center bg-white rounded-2xl px-4 py-4 border-2 ${
+                    emailError ? "border-red-400" : "border-gray-200"
                   }`}
                 >
                   <Feather
                     name="mail"
                     size={20}
-                    color={emailError ? "#EF4444" : "#9CA3AF"}
+                    color={emailError ? "#DC143C" : "#9CA3AF"}
                   />
                   <TextInput
                     placeholder="your@email.com"
@@ -255,36 +227,31 @@ export default function Login() {
                         setEmailError("");
                       }}
                     >
-                      <Feather name="x-circle" size={18} color="#9CA3AF" />
+                      <Feather name="x" size={18} color="#9CA3AF" />
                     </TouchableOpacity>
                   )}
                 </View>
-                {emailError ? (
-                  <View className="flex-row items-center mt-2 ml-1">
-                    <Feather name="alert-circle" size={12} color="#EF4444" />
-                    <Text className="text-red-500 text-xs ml-1">
-                      {emailError}
-                    </Text>
-                  </View>
-                ) : null}
+                {emailError && (
+                  <Text className="text-red-500 text-xs mt-2 ml-1">
+                    {emailError}
+                  </Text>
+                )}
               </View>
 
               {/* Password Input */}
-              <View className="mb-4">
-                <Text className="text-gray-700 font-semibold mb-2 text-xs tracking-wide">
-                  PASSWORD
+              <View className="mb-6">
+                <Text className="text-gray-700 font-semibold mb-2 text-sm">
+                  Password
                 </Text>
                 <View
-                  className={`flex-row items-center bg-gray-50 rounded-2xl px-4 py-4 ${
-                    passwordError
-                      ? "border-2 border-red-400"
-                      : "border border-gray-200"
+                  className={`flex-row items-center bg-white rounded-2xl px-4 py-4 border-2 ${
+                    passwordError ? "border-red-400" : "border-gray-200"
                   }`}
                 >
                   <Feather
                     name="lock"
                     size={20}
-                    color={passwordError ? "#EF4444" : "#9CA3AF"}
+                    color={passwordError ? "#DC143C" : "#9CA3AF"}
                   />
                   <TextInput
                     placeholder="Enter your password"
@@ -306,50 +273,30 @@ export default function Login() {
                     />
                   </TouchableOpacity>
                 </View>
-                {passwordError ? (
-                  <View className="flex-row items-center mt-2 ml-1">
-                    <Feather name="alert-circle" size={12} color="#EF4444" />
-                    <Text className="text-red-500 text-xs ml-1">
-                      {passwordError}
-                    </Text>
-                  </View>
-                ) : null}
-              </View>
-
-              {/* Remember Me & Forgot Password */}
-              <View className="flex-row justify-between items-center mb-6">
-                <TouchableOpacity
-                  onPress={() => setRememberMe(!rememberMe)}
-                  className="flex-row items-center"
-                >
-                  <View
-                    className={`w-5 h-5 rounded border-2 ${
-                      rememberMe
-                        ? "bg-emerald-500 border-emerald-500"
-                        : "border-gray-300"
-                    } items-center justify-center mr-2`}
-                  >
-                    {rememberMe && (
-                      <Feather name="check" size={12} color="#FFFFFF" />
-                    )}
-                  </View>
-                  <Text className="text-gray-600 text-sm">Remember me</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={handleForgotPassword}>
-                  <Text className="text-emerald-600 font-semibold text-sm">
-                    Forgot Password?
+                {passwordError && (
+                  <Text className="text-red-500 text-xs mt-2 ml-1">
+                    {passwordError}
                   </Text>
-                </TouchableOpacity>
+                )}
               </View>
+
+              {/* Forgot Password */}
+              <TouchableOpacity
+                onPress={handleForgotPassword}
+                className="self-end mb-6"
+              >
+                <Text className="text-red-600 font-semibold text-sm">
+                  Forgot Password?
+                </Text>
+              </TouchableOpacity>
 
               {/* Login Button */}
               <TouchableOpacity
                 onPress={handleLogin}
                 disabled={isLoading}
                 className={`rounded-2xl py-4 mb-6 shadow-lg ${
-                  isLoading ? "bg-emerald-400" : "bg-emerald-500"
-                } active:bg-emerald-600`}
+                  isLoading ? "bg-red-400" : "bg-red-600"
+                }`}
               >
                 <View className="flex-row items-center justify-center">
                   {isLoading ? (
@@ -361,9 +308,9 @@ export default function Login() {
                     </>
                   ) : (
                     <>
-                      <Feather name="log-in" size={20} color="#FFFFFF" />
+                      <Feather name="map" size={20} color="#FFFFFF" />
                       <Text className="text-white font-bold text-base ml-2">
-                        Continue Journey
+                        Explore Cebu
                       </Text>
                     </>
                   )}
@@ -373,7 +320,7 @@ export default function Login() {
               {/* Divider */}
               <View className="flex-row items-center mb-6">
                 <View className="flex-1 h-px bg-gray-200" />
-                <Text className="text-gray-400 text-xs mx-4 font-medium">
+                <Text className="text-gray-400 text-sm mx-4 font-medium">
                   Or continue with
                 </Text>
                 <View className="flex-1 h-px bg-gray-200" />
@@ -383,81 +330,60 @@ export default function Login() {
               <View className="flex-row justify-between mb-8 gap-3">
                 <TouchableOpacity
                   onPress={() => handleSocialLogin("Google")}
-                  className="flex-1 bg-white border-2 border-gray-200 rounded-xl py-3.5 items-center shadow-sm active:bg-gray-50"
+                  className="flex-1 bg-white border-2 border-gray-200 rounded-xl py-3.5 items-center"
                 >
-                  <Image
-                    source={{
-                      uri: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
-                    }}
-                    className="w-5 h-5"
-                  />
+                  <Feather name="chrome" size={20} color="#374151" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => handleSocialLogin("Facebook")}
-                  className="flex-1 bg-blue-600 rounded-xl py-3.5 items-center shadow-sm active:bg-blue-700"
+                  className="flex-1 bg-blue-600 rounded-xl py-3.5 items-center"
                 >
                   <Feather name="facebook" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => handleSocialLogin("Apple")}
-                  className="flex-1 bg-black rounded-xl py-3.5 items-center shadow-sm active:bg-gray-900"
+                  className="flex-1 bg-black rounded-xl py-3.5 items-center"
                 >
                   <Feather name="smartphone" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
               </View>
 
               {/* Sign Up Link */}
-              <View className="flex-row justify-center items-center mb-6">
-                <Text className="text-gray-600 text-sm">
-                  New to SugVoyage?{" "}
-                </Text>
+              <View className="flex-row justify-center items-center mb-8">
+                <Text className="text-gray-600 text-sm">New to Sugoyage? </Text>
                 <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-                  <Text className="text-emerald-600 font-bold text-sm">
+                  <Text className="text-red-600 font-bold text-sm">
                     Create Account
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Demo Credentials */}
-              <View className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-4 mb-8">
-                <View className="flex-row items-center mb-3">
-                  <View className="bg-amber-100 rounded-full p-1.5 mr-2">
-                    <Feather name="info" size={14} color="#F59E0B" />
-                  </View>
-                  <Text className="text-amber-900 font-bold text-sm">
-                    Demo Mode Available
+              {/* Demo Hint */}
+              <View className="bg-red-50 rounded-2xl p-4 border border-red-200">
+                <View className="flex-row items-center mb-2">
+                  <Feather name="info" size={16} color="#DC143C" />
+                  <Text className="text-red-700 font-semibold text-sm ml-2">
+                    Demo Access
                   </Text>
                 </View>
-                <View className="bg-white rounded-xl p-3 border border-amber-100">
-                  <View className="flex-row items-center mb-2">
-                    <Feather name="mail" size={12} color="#92400E" />
-                    <Text className="text-amber-900 text-xs ml-2 font-medium">
-                      traveler@demo.com
-                    </Text>
-                  </View>
-                  <View className="flex-row items-center">
-                    <Feather name="lock" size={12} color="#92400E" />
-                    <Text className="text-amber-900 text-xs ml-2 font-medium">
-                      any password works
-                    </Text>
-                  </View>
-                </View>
+                <Text className="text-red-600 text-xs">
+                  Use any valid email format and password to login
+                </Text>
               </View>
             </Animated.View>
 
             {/* Bottom Section */}
-            <View className="items-center px-6 pb-8 pt-4">
-              <View className="flex-row items-center mb-4">
+            <View className="items-center px-6 pb-8 pt-6">
+              <View className="flex-row items-center mb-3">
                 <Feather name="shield" size={14} color="#9CA3AF" />
                 <Text className="text-gray-400 text-xs ml-2">
-                  Your data is secure and encrypted
+                  Secure & Encrypted
                 </Text>
               </View>
-              <Text className="text-gray-400 text-xs text-center px-8 leading-5">
-                Discover hidden gems, explore pristine beaches, and create
-                unforgettable memories in Cebu 🌊✨
+              <Text className="text-gray-400 text-xs text-center">
+                Your travel data is safe with us 🛡️
               </Text>
             </View>
           </Animated.View>

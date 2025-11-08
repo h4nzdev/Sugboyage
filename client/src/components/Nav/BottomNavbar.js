@@ -8,12 +8,13 @@ function BottomNavbar({ state, navigation }) {
 
   const activeTab = state.routes[state.index].name;
 
+  // Updated tabs based on docs structure
   const tabs = [
-    { id: "home", icon: "home" },
-    { id: "discover", icon: "compass" },
-    { id: "ai", icon: "message-circle" },
-    { id: "trips", icon: "map" },
-    { id: "flights", icon: "airplay" },
+    { id: "home", icon: "home", label: "Home" },
+    { id: "discover", icon: "compass", label: "Discover" },
+    { id: "map", icon: "map", label: "Map" }, // 🗺️ Center position!
+    { id: "social-feed", icon: "users", label: "Social" },
+    { id: "travel-hub", icon: "briefcase", label: "TravelHub" },
   ];
 
   const handleTabPress = (tabName) => {
@@ -40,18 +41,14 @@ function BottomNavbar({ state, navigation }) {
       <View
         className="flex-row bg-white rounded-full px-4 py-2"
         style={{
-          shadowColor: "#06b6d4",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.2,
-          shadowRadius: 16,
           elevation: 10,
           borderWidth: 1,
-          borderColor: "#cffafe",
+          borderColor: "#fecaca", // Light red border
         }}
       >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
-          const isAITab = tab.id === "ai";
+          const isPlannerTab = tab.id === "map";
 
           return (
             <TouchableOpacity
@@ -61,32 +58,41 @@ function BottomNavbar({ state, navigation }) {
             >
               <View
                 className={`items-center justify-center rounded-full ${
-                  isAITab ? "w-12 h-12" : "w-10 h-10"
+                  isPlannerTab ? "w-12 h-12" : "w-10 h-10"
                 }`}
                 style={{
                   backgroundColor: isActive
-                    ? isAITab
-                      ? "#06b6d4"
-                      : "#f0fdff"
-                    : isAITab
-                      ? "#06b6d4"
+                    ? isPlannerTab
+                      ? "#DC143C"
+                      : "#fef2f2"
+                    : isPlannerTab
+                      ? "#DC143C"
                       : "transparent",
                 }}
               >
                 <Feather
                   name={tab.icon}
-                  size={isAITab ? 22 : 20}
+                  size={isPlannerTab ? 22 : 20}
                   color={
                     isActive
-                      ? isAITab
-                        ? "#ffffff"
-                        : "#06b6d4"
-                      : isAITab
-                        ? "#ffffff"
-                        : "#64748b"
+                      ? isPlannerTab
+                        ? "#FFFFFF"
+                        : "#DC143C"
+                      : isPlannerTab
+                        ? "#FFFFFF"
+                        : "#718096"
                   }
                 />
               </View>
+              {/* Optional: Add labels for better UX */}
+              <Text
+                className={`text-xs mt-1 ${
+                  isActive ? "text-red-600 font-semibold" : "text-gray-500"
+                }`}
+                numberOfLines={1}
+              >
+                {tab.label}
+              </Text>
             </TouchableOpacity>
           );
         })}
