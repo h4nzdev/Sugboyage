@@ -107,8 +107,8 @@ const MapSection = ({ spots, onSpotPress }) => {
             userLocation || {
               latitude: 10.3157,
               longitude: 123.8854,
-              latitudeDelta: 0.1,
-              longitudeDelta: 0.1,
+              latitudeDelta: 0.05,
+              longitudeDelta: 0.05,
             }
           }
           showsUserLocation={true}
@@ -122,10 +122,12 @@ const MapSection = ({ spots, onSpotPress }) => {
                 latitude: spot.latitude,
                 longitude: spot.longitude,
               }}
-              pinColor={"#dc2626"}
-              tracksViewChanges={false}
               onPress={() => onSpotPress(spot)}
-            />
+            >
+              <View className="h-6 w-6 bg-red-300 rounded-full border border-red-500 items-center justify-center">
+                <Feather name="map-pin" color={"red"} />
+              </View>
+            </Marker>
           ))}
         </MapView>
       </View>

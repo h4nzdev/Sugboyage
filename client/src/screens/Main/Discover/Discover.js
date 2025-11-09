@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
   ImageBackground,
+  Image,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Feather } from "@expo/vector-icons";
@@ -177,73 +178,90 @@ export default function Discover() {
         elevation: 8,
         borderWidth: 1,
         borderColor: "#f3f4f6",
-        height: 160, // Fixed height for consistent layout
+        height: 180,
       }}
+      activeOpacity={0.9}
       onPress={() =>
         navigation.navigate("detailed-info", { spotId: destination._id })
       }
     >
-      {/* Image Container - Left Side */}
+      {/* Left Image Section */}
       <View className="w-32 relative">
-        <View
-          className="absolute inset-0"
-          style={{
-            backgroundColor: destination.color || "#4A90E2",
+        <Image
+          source={{
+            uri: destination.image_url,
           }}
+          className="w-full h-full"
+          resizeMode="cover"
         />
 
         {/* Gradient Overlay */}
-        <View className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/30" />
+        <View
+          className="absolute inset-0"
+          style={{
+            backgroundColor: "rgba(0,0,0,0.2)",
+          }}
+        />
 
-        {/* Top Badge */}
-        <View className="absolute top-2 left-2">
-          <View className="bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full">
-            <Text className="text-red-600 text-xs font-bold">
-              {destination.category || "Attraction"}
-            </Text>
-          </View>
+        {/* Category Badge */}
+        <View className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded-full">
+          <Text
+            className="text-red-600 text-[10px] font-bold"
+            numberOfLines={1}
+          >
+            {destination.category || "Attraction"}
+          </Text>
         </View>
 
-        {/* Bottom Rating */}
+        {/* Rating */}
         <View className="absolute bottom-2 left-2 right-2">
           <View className="bg-black/70 px-2 py-1 rounded-full flex-row items-center justify-center">
             <Feather name="star" size={10} color="#F59E0B" />
-            <Text className="text-white text-xs font-semibold ml-1">
-              {destination.rating}
+            <Text
+              className="text-white text-[10px] font-semibold ml-1"
+              numberOfLines={1}
+            >
+              {destination.rating || "4.5"}
             </Text>
           </View>
         </View>
       </View>
 
-      {/* Content Section - Right Side */}
+      {/*  Right Info Section */}
       <View className="flex-1 p-3 justify-between">
-        {/* Top Section */}
+        {/* Title + Location + Description */}
         <View>
           <Text
-            className="text-gray-900 font-bold text-base mb-1"
+            className="text-gray-900 font-bold text-sm"
             numberOfLines={1}
+            ellipsizeMode="tail"
           >
-            {destination.name}
+            {destination.name || "Beautiful Place"}
           </Text>
 
           <View className="flex-row items-center mb-1">
             <Feather name="map-pin" size={12} color="#718096" />
-            <Text className="text-gray-500 text-xs ml-1" numberOfLines={1}>
+            <Text
+              className="text-gray-500 text-xs ml-1 flex-shrink"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
               {destination.location || "Cebu, Philippines"}
             </Text>
           </View>
 
           <Text
-            className="text-gray-600 text-xs leading-4 mb-2"
+            className="text-gray-600 text-[11px] leading-4"
             numberOfLines={2}
+            ellipsizeMode="tail"
           >
             {destination.description ||
-              "Explore this amazing destination in Cebu with stunning views."}
+              "Discover this amazing destination with stunning scenery and relaxing atmosphere."}
           </Text>
         </View>
 
-        {/* Bottom Stats */}
-        <View className="flex-row items-center justify-between">
+        {/* 📍 Stats + Actions */}
+        <View className="flex-row justify-between items-center mt-2">
           {/* Price */}
           <View className="bg-red-50 px-2 py-1 rounded-lg">
             <Text className="text-red-700 text-xs font-bold">
@@ -252,28 +270,37 @@ export default function Discover() {
           </View>
 
           {/* Distance & Time */}
-          <View className="flex-row items-center space-x-1">
-            <View className="flex-row items-center">
-              <Feather name="clock" size={10} color="#718096" />
-              <Text className="text-gray-500 text-xs ml-1">
-                {destination.distance || "15min"}
-              </Text>
-            </View>
+          <View className="flex-row items-center">
+            <Feather name="clock" size={10} color="#718096" />
+            <Text
+              className="text-gray-500 text-xs ml-1"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {destination.distance || "15 min"}
+            </Text>
 
             <View className="w-1 h-1 bg-gray-300 rounded-full mx-1" />
 
-            <Text className="text-gray-500 text-xs">
+            <Text className="text-gray-500 text-xs" numberOfLines={1}>
               {destination.days || "2-3h"}
             </Text>
           </View>
         </View>
 
-        {/* Quick Actions */}
+        {/* Activities + Arrow */}
         <View className="flex-row justify-between items-center mt-2">
-          <View className="flex-row space-x-1">
+          <View className="flex-row flex-wrap gap-1 max-w-[70%]">
             {destination.activities?.slice(0, 2).map((activity, index) => (
-              <View key={index} className="bg-gray-100 px-2 py-1 rounded-lg">
-                <Text className="text-gray-600 text-xs" numberOfLines={1}>
+              <View
+                key={index}
+                className="bg-gray-100 px-2 py-1 rounded-lg mb-1"
+              >
+                <Text
+                  className="text-gray-600 text-[10px]"
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                >
                   {activity}
                 </Text>
               </View>

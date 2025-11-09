@@ -11,6 +11,7 @@ import { Feather } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CebuSpotsService } from "../../../services/cebuSpotService";
+import SvgUri from "react-native-svg";
 
 export default function DetailedInfo() {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -195,7 +196,7 @@ export default function DetailedInfo() {
           "Visit during good weather",
           "Wear comfortable shoes",
         ],
-        image:
+        image_url:
           "https://images.unsplash.com/photo-1588666309990-70df6fe85e74?w=800&h=400&fit=crop",
       };
 
@@ -252,7 +253,9 @@ export default function DetailedInfo() {
         {/* Image Header */}
         <View className="relative">
           <Image
-            source={{ uri: locationData.image }}
+            source={{
+              uri: spotData.image_url,
+            }}
             className="w-full h-64"
             resizeMode="cover"
           />
@@ -280,7 +283,7 @@ export default function DetailedInfo() {
 
           {/* Price/Type Badge */}
           <View className="absolute bottom-4 left-5 bg-white/90 px-3 py-2 rounded-xl">
-            <Text className="text-emerald-600 font-bold text-sm">
+            <Text className="text-red-600 font-bold text-sm">
               {locationData.price}
             </Text>
             <Text className="text-gray-600 text-xs">{locationData.type}</Text>
@@ -380,8 +383,8 @@ export default function DetailedInfo() {
                   className="items-center mb-4"
                   style={{ width: "30%" }}
                 >
-                  <View className="w-12 h-12 bg-emerald-50 rounded-xl items-center justify-center mb-2 border border-emerald-100">
-                    <Feather name={facility.icon} size={20} color="#059669" />
+                  <View className="w-12 h-12 bg-red-50 rounded-xl items-center justify-center mb-2 border border-red-100">
+                    <Feather name={facility.icon} size={20} color="#FF0000" />
                   </View>
                   <Text className="text-gray-700 text-xs text-center font-medium">
                     {facility.name}
@@ -450,16 +453,16 @@ export default function DetailedInfo() {
           </Text>
 
           {/* AI Assistant CTA */}
-          <TouchableOpacity className="bg-emerald-50 rounded-xl p-4 border border-emerald-100">
+          <TouchableOpacity className="bg-red-50 rounded-xl p-4 border border-red-100">
             <View className="flex-row items-center">
-              <View className="w-8 h-8 bg-emerald-500 rounded-lg items-center justify-center mr-3">
+              <View className="w-8 h-8 bg-red-500 rounded-lg items-center justify-center mr-3">
                 <Feather name="cpu" size={16} color="#FFFFFF" />
               </View>
               <View className="flex-1">
-                <Text className="text-emerald-900 font-bold text-sm">
+                <Text className="text-red-900 font-bold text-sm">
                   Need more info?
                 </Text>
-                <Text className="text-emerald-700 text-xs">
+                <Text className="text-red-700 text-xs">
                   Ask AI assistant about this location
                 </Text>
               </View>
@@ -471,7 +474,7 @@ export default function DetailedInfo() {
 
       {/* Bottom Action Bar - Enhanced for Travel */}
       <View
-        style={{ paddingBottom: insets.bottom }}
+        style={{ paddingBottom: insets.bottom + 10 }}
         className="px-5 py-4 border-t border-gray-200 bg-white flex-row items-center justify-between"
       >
         <View className="flex-shrink">
@@ -484,17 +487,17 @@ export default function DetailedInfo() {
         <View className="flex-row flex-1 justify-end" style={{ gap: 12 }}>
           <TouchableOpacity
             onPress={handleGetDirections}
-            className="border border-emerald-500 px-4 py-3 rounded-xl flex-row items-center"
+            className="border border-red-500 px-4 py-3 rounded-xl flex-row items-center"
           >
             <Feather name="navigation" size={16} color="#059669" />
-            <Text className="text-emerald-600 font-semibold text-sm ml-2">
+            <Text className="text-red-600 font-semibold text-sm ml-2">
               Directions
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             onPress={handleBookNow}
-            className="bg-emerald-500 px-6 py-3 rounded-xl min-w-20"
+            className="bg-red-500 px-6 py-3 rounded-xl min-w-20"
           >
             <Text className="text-white font-bold text-base text-center">
               Plan Visit

@@ -6,6 +6,7 @@ import {
   Animated,
   Dimensions,
   ImageBackground,
+  Image,
 } from "react-native";
 import React, { useState, useEffect, useRef } from "react";
 import { Feather } from "@expo/vector-icons";
@@ -16,6 +17,7 @@ import { colors } from "../../../utils/colors";
 import cebu from "../../../../assets/homepage_photos/cebu.png";
 import MainHeader from "../../../components/Header/MainHeader";
 import { useNavigation } from "@react-navigation/native";
+import { useNotification } from "../../../context/NotificationContext";
 
 const { width } = Dimensions.get("window");
 
@@ -149,7 +151,20 @@ const EmptyState = () => {
 };
 
 // Attraction List Cards
-const AttractionList = ({ spots, onSpotPress }) => {
+const AttractionList = ({ spots, onSpotPress, isLoading }) => {
+  const navigation = useNavigation();
+
+  if (isLoading) {
+    return (
+      <View className="flex-row items-center justify-center py-12 px-4 gap-2">
+        <Text className="text-lg font-bold text-gray-800">Loading</Text>
+        <View className="animate-spin border-2 border-red-500 rounded-full w-8 h-8">
+          <View className="absolute inset-0 top-0 bg-white w-4 h-4 rounded-full" />
+        </View>
+      </View>
+    );
+  }
+
   if (spots.length === 0) {
     return (
       <View className="mb-6">
@@ -169,27 +184,30 @@ const AttractionList = ({ spots, onSpotPress }) => {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 16, gap: 16 }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          gap: 16,
+          paddingVertical: 4,
+        }}
       >
         {spots.map((spot, index) => (
           <TouchableOpacity
             key={spot.id}
-            className="bg-white rounded-2xl overflow-hidden w-72 shadow-md active:scale-95"
-            onPress={() => onSpotPress(spot)}
+            className="bg-white rounded-2xl overflow-hidden w-72 shadow-lg active:scale-95 border border-gray-100"
+            onPress={() =>
+              navigation.navigate("detailed-info", { spotId: spot._id })
+            }
           >
-            {/* Image section with gradient */}
-            <View
-              className="h-40 justify-end p-4"
-              style={{
-                backgroundColor:
-                  index % 3 === 0
-                    ? "#5C6BC0"
-                    : index % 3 === 1
-                      ? "#26A69A"
-                      : "#FF7043",
-              }}
-            >
-              <View className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+            {/* Image section */}
+            <View className="relative h-40">
+              <Image
+                source={{
+                  uri: spot.image_url,
+                }}
+                className="w-full h-full"
+                resizeMode="cover"
+              />
+              <View className="absolute inset-0 bg-black/10" />
             </View>
 
             {/* Content section */}
@@ -213,12 +231,7 @@ const AttractionList = ({ spots, onSpotPress }) => {
                     {spot.rating}
                   </Text>
                   <Text className="text-xs text-gray-500 ml-1">
-                    ({spot.reviews})
-                  </Text>
-                </View>
-                <View className="bg-red-600 px-2 py-1 rounded-full">
-                  <Text className="text-white text-xs font-bold">
-                    {spot.distance}
+                    ({spot.reviews || "No reviews"})
                   </Text>
                 </View>
               </View>
@@ -343,6 +356,8 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [spots, setSpots] = useState([]);
   const [filteredSpots, setFilteredSpots] = useState([]);
+  const { sendCustomNotification } = useNotification();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadSpots();
@@ -353,12 +368,15 @@ export default function Home() {
   }, [selectedCategory, spots]);
 
   const loadSpots = async () => {
+    setIsLoading(true);
     try {
       const spotsData = await CebuSpotsService.getAllCebuSpots();
       setSpots(spotsData);
     } catch (error) {
       console.error("Error loading spots:", error);
       setSpots(CebuSpotsService.getAllCebuSpots());
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -393,7 +411,11 @@ export default function Home() {
           selectedCategory={selectedCategory}
           onCategorySelect={setSelectedCategory}
         />
-        <AttractionList spots={filteredSpots} onSpotPress={handleSpotPress} />
+        <AttractionList
+          spots={filteredSpots}
+          onSpotPress={handleSpotPress}
+          isLoading={isLoading}
+        />
         <LiveStatus />
         <MapSection spots={filteredSpots} onSpotPress={handleSpotPress} />
       </ScrollView>
