@@ -1,8 +1,7 @@
 import axios from "axios";
+import Config from "../config/api";
 
-const API_BASE_URL =
-  "https://expositorially-hamulate-carola.ngrok-free.dev/api";
-
+const API_BASE_URL = Config.API_BASE_URL;
 export class CebuSpotsService {
   static async getAllCebuSpots() {
     try {

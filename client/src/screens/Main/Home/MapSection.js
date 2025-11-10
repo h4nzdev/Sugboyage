@@ -115,7 +115,7 @@ const MapSection = ({ spots, onSpotPress }) => {
           showsMyLocationButton={true}
         >
           <UserLocationRadius key="user-radius-component" />
-          {spots.map((spot, index) => (
+          {spots.map((spot, index) => ( 
             <Marker
               key={getUniqueSpotKey(spot, index)}
               coordinate={{

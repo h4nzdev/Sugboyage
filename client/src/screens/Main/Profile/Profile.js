@@ -1,11 +1,24 @@
-import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
-import React, { useState } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  Alert,
+  Modal,
+} from "react-native";
+import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { AuthenticationService } from "../../../services/authentication_services/authenticationService";
+import EditProfileModal from "./EditProfileModal";
+import { useAuth } from "../../../context/AuthenticationContext";
 
 export default function Profile() {
   const navigation = useNavigation();
+  const { user, updateProfile, logout } = useAuth();
 
   // Colors matching your app theme
   const colors = {
@@ -17,15 +30,49 @@ export default function Profile() {
     light: "#F7FAFC",
   };
 
-  // User stats based on docs - Social contributions
+  // State for edit mode
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    displayName: "",
+    bio: "",
+    location: "",
+    avatar: "👤",
+  });
+  const [loading, setLoading] = useState(false);
+
+  // Initialize edit data when user changes
+  useEffect(() => {
+    if (user) {
+      setEditData({
+        displayName: user.profile?.displayName || "",
+        bio: user.profile?.bio || "",
+        location: user.profile?.location || "",
+        avatar: user.profile?.avatar || "👤",
+      });
+    }
+  }, [user]);
+
+  // User stats based on actual user data
   const userStats = [
-    { label: "Posts", value: "24", icon: "message-circle" },
-    { label: "Likes", value: "156", icon: "heart" },
-    { label: "Saved", value: "18", icon: "bookmark" },
+    {
+      label: "Posts",
+      value: user?.socialStats?.postsCount || "0",
+      icon: "message-circle",
+    },
+    {
+      label: "Followers",
+      value: user?.socialStats?.followers || "0",
+      icon: "users",
+    },
+    {
+      label: "Following",
+      value: user?.socialStats?.following || "0",
+      icon: "user-plus",
+    },
     { label: "Spots", value: "32", icon: "map-pin" },
   ];
 
-  // User's posts from Social Feed (based on docs)
+  // Sample posts (would come from API in real app)
   const userPosts = [
     {
       id: 1,
@@ -47,19 +94,9 @@ export default function Profile() {
       timestamp: "1 week ago",
       image: "🍽️",
     },
-    {
-      id: 3,
-      content:
-        "Magellan's Cross is such an important historical site. Standing where Christianity was introduced to the Philippines was a moving experience. ✝️",
-      location: "Magellan's Cross, Cebu City",
-      likes: 31,
-      comments: 3,
-      timestamp: "2 weeks ago",
-      image: "⛪",
-    },
   ];
 
-  // Saved itineraries from AI Planner (based on docs)
+  // Sample itineraries
   const savedItineraries = [
     {
       id: 1,
@@ -75,30 +112,99 @@ export default function Profile() {
       spots: 8,
       created: "2 weeks ago",
     },
-    {
-      id: 3,
-      title: "Food Tour Experience",
-      duration: "1 day",
-      spots: 5,
-      created: "3 weeks ago",
-    },
   ];
 
-  // Settings options based on docs
+  // Settings options
   const settingsOptions = [
+    {
+      icon: "user",
+      label: "Edit Profile",
+      description: "Update your personal information",
+      onPress: () => setIsEditing(true),
+    },
     {
       icon: "map-pin",
       label: "Radius Settings",
       description: "Adjust geofencing distance",
+      onPress: () => navigation.navigate("Settings"),
     },
-    { icon: "bell", label: "Notifications", description: "Manage push alerts" },
     {
-      icon: "user",
-      label: "Account Details",
-      description: "Update profile information",
+      icon: "bell",
+      label: "Notifications",
+      description: "Manage push alerts",
+      onPress: () => navigation.navigate("Notifications"),
     },
-    { icon: "shield", label: "Privacy", description: "Control data sharing" },
+    {
+      icon: "shield",
+      label: "Privacy",
+      description: "Control data sharing",
+      onPress: () => navigation.navigate("Privacy"),
+    },
+    {
+      icon: "log-out",
+      label: "Logout",
+      description: "Sign out of your account",
+      onPress: handleLogout,
+      color: "#DC143C",
+    },
   ];
+
+  async function handleSaveProfile() {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      console.log("🔄 Updating profile directly...");
+
+      const result = await AuthenticationService.updateUserProfile(
+        user._id,
+        editData
+      );
+
+      if (result.success) {
+        // Update local state directly
+        setUser(result.user);
+        Alert.alert("Success", "Profile updated successfully!");
+        setIsEditing(false);
+      } else {
+        Alert.alert("Error", result.error || "Failed to update profile");
+      }
+    } catch (error) {
+      console.error("❌ Save profile error:", error);
+      Alert.alert("Error", "Failed to update profile");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleLogout() {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: () => {
+          logout();
+          navigation.navigate("Login");
+        },
+      },
+    ]);
+  }
+
+  function handleInputChange(field, value) {
+    setEditData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  if (!user) {
+    return (
+      <SafeAreaView className="flex-1 bg-gray-50 justify-center items-center">
+        <Text className="text-gray-500">Loading profile...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -107,10 +213,10 @@ export default function Profile() {
         <View className="flex-row justify-between items-center">
           <Text className="text-2xl font-black text-gray-900">My Profile</Text>
           <TouchableOpacity
-            onPress={() => navigation.navigate("settings")}
+            onPress={() => setIsEditing(true)}
             className="p-2 bg-gray-100 rounded-xl"
           >
-            <Feather name="settings" size={18} color={colors.text} />
+            <Feather name="edit-3" size={18} color={colors.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -121,25 +227,43 @@ export default function Profile() {
           <View className="flex-row items-center mb-6">
             <View className="relative">
               <View className="w-20 h-20 bg-red-100 rounded-2xl items-center justify-center">
-                <Feather name="user" size={32} color={colors.primary} />
+                <Text className="text-2xl">{user.profile?.avatar || "👤"}</Text>
               </View>
-              <View className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-600 rounded-full items-center justify-center border-2 border-white">
-                <Feather name="check" size={12} color="white" />
-              </View>
+              {user.isVerified && (
+                <View className="absolute -bottom-1 -right-1 w-6 h-6 bg-red-600 rounded-full items-center justify-center border-2 border-white">
+                  <Feather name="check" size={12} color="white" />
+                </View>
+              )}
             </View>
 
             <View className="ml-4 flex-1">
               <Text className="text-xl font-black text-gray-900">
-                Hanz Christian
+                {user.profile?.displayName || user.username}
               </Text>
               <Text className="text-red-600 text-sm font-semibold mt-1">
-                🗺️ Cebu Explorer • 📱 Sugoyage User
+                🗺️ {user.profile?.location || "Cebu Explorer"} • 📱 @
+                {user.username}
               </Text>
+
+              {user.profile?.bio ? (
+                <Text className="text-gray-600 text-sm mt-2">
+                  {user.profile.bio}
+                </Text>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => setIsEditing(true)}
+                  className="mt-2"
+                >
+                  <Text className="text-gray-400 text-sm">Add a bio...</Text>
+                </TouchableOpacity>
+              )}
 
               <View className="flex-row items-center mt-2">
                 <View className="bg-red-50 px-3 py-1 rounded-full">
                   <Text className="text-red-700 text-sm font-semibold">
-                    Community Contributor
+                    {user.isVerified
+                      ? "Verified Explorer"
+                      : "Community Contributor"}
                   </Text>
                 </View>
               </View>
@@ -311,24 +435,33 @@ export default function Profile() {
         {/* Settings & Preferences */}
         <View className="bg-white px-5 py-5 mb-4">
           <Text className="text-lg font-black text-gray-900 mb-4">
-            Settings & Preferences
+            Account Settings
           </Text>
 
           <View className="gap-2">
             {settingsOptions.map((option, index) => (
               <TouchableOpacity
                 key={index}
+                onPress={option.onPress}
                 className="flex-row items-center p-4 bg-gray-50 rounded-xl"
               >
-                <View className="w-10 h-10 bg-red-100 rounded-xl items-center justify-center mr-3">
+                <View
+                  className={`w-10 h-10 rounded-xl items-center justify-center mr-3 ${
+                    option.color ? "bg-red-100" : "bg-red-100"
+                  }`}
+                >
                   <Feather
                     name={option.icon}
                     size={18}
-                    color={colors.primary}
+                    color={option.color || colors.primary}
                   />
                 </View>
                 <View className="flex-1">
-                  <Text className="font-semibold text-gray-900 text-sm">
+                  <Text
+                    className={`font-semibold text-sm ${
+                      option.color ? "text-red-600" : "text-gray-900"
+                    }`}
+                  >
                     {option.label}
                   </Text>
                   <Text className="text-gray-500 text-xs">
@@ -349,6 +482,14 @@ export default function Profile() {
           </Text>
         </View>
       </ScrollView>
+
+      <EditProfileModal
+        visible={isEditing}
+        onClose={() => setIsEditing(false)}
+        user={user}
+        onSave={handleSaveProfile}
+        loading={loading}
+      />
     </SafeAreaView>
   );
 }

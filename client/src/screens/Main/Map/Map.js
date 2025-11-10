@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as Location from "expo-location";
 import { Directions } from "openrouteservice-js";
 import { useNotification } from "../../../context/NotificationContext";
+import Gamepad from "./Gamepad";
 
 // ==================== CONSTANTS ====================
 const OPENROUTE_API_KEY =
@@ -270,7 +271,7 @@ const SpotCard = ({
 };
 
 // ==================== MAIN COMPONENT ====================
-export default function SimpleMap() {
+export default function Map() {
   // State
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedSpot, setSelectedSpot] = useState(null);
@@ -278,11 +279,14 @@ export default function SimpleMap() {
   const [routeInfo, setRouteInfo] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
   const [travelMode, setTravelMode] = useState("foot-walking");
+  const [showGamepad, setShowGamepad] = useState(false);
+  const [markerUpdateKey, setMarkerUpdateKey] = useState(0); // 🎯 THE MAGIC FIX
 
   // Refs & Hooks
   const mapRef = useRef();
   const navigation = useNavigation();
-  const { radius, setRadius, spots, loadSpots } = useNotification();
+  const { radius, setRadius, spots, loadSpots, sendTestNotification } =
+    useNotification();
 
   // Filter spots based on category and radius
   const filteredSpots =
@@ -314,6 +318,44 @@ export default function SimpleMap() {
       loadSpots();
     }
   }, []);
+
+  useEffect(() => {
+    if (userLocation) {
+      setMarkerUpdateKey((prev) => prev + 1);
+    }
+  }, [userLocation, radius]);
+
+  //Gamepad Functions
+  const handleUserMove = (direction) => {
+    if (!userLocation) return;
+
+    const step = 0.001;
+    const newLocation = { ...userLocation };
+
+    switch (direction) {
+      case "up":
+        newLocation.latitude += step;
+        break;
+      case "down":
+        newLocation.latitude -= step;
+        break;
+      case "left":
+        newLocation.longitude -= step;
+        break;
+      case "right":
+        newLocation.longitude += step;
+        break;
+      default:
+        return;
+    }
+
+    setUserLocation(newLocation);
+
+    // Animate map to new location
+    if (mapRef.current) {
+      mapRef.current.animateToRegion(newLocation, 500);
+    }
+  };
 
   // Core Functions
   const setupApp = async () => {
@@ -471,6 +513,24 @@ export default function SimpleMap() {
     return distance <= radius ? "green" : "red";
   };
 
+  const sendNotification = (spot) => {
+    if (!userLocation) return null;
+    const distance = calculateDistance(
+      userLocation.latitude,
+      userLocation.longitude,
+      spot.latitude,
+      spot.longitude
+    );
+
+    return distance <= radius ? sendTestNotification() : null;
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      sendNotification();
+    }, 5000);
+  }, []);
+
   if (!userLocation) {
     return (
       <SafeAreaView className="flex-1 bg-white items-center justify-center">
@@ -529,17 +589,19 @@ export default function SimpleMap() {
             />
           )}
 
-          {/* Spots */}
+          {/* 🎯 SPOTS - THE MAGIC HAPPENS HERE */}
           {filteredSpots.map((spot, index) => (
             <Marker
-              key={`spot-${spot.id}-${index}`}
+              key={`spot-${spot.id}-${index}-${markerUpdateKey}`} // 🎯 THIS FORCES RE-RENDER
               coordinate={{
                 latitude: spot.latitude,
                 longitude: spot.longitude,
               }}
               onPress={() => focusOnSpot(spot)}
               pinColor={getMarkerColor(spot)}
-            />
+            >
+              {sendNotification(spot)}
+            </Marker>
           ))}
         </MapView>
 

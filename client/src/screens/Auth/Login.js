@@ -23,10 +23,10 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const { setUser } = useAuth();
+
+  const { login, loading, error, clearError } = useAuth();
 
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -34,6 +34,9 @@ export default function Login() {
   const shakeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Clear any previous errors when component mounts
+    clearError();
+
     // Entrance animation
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -49,6 +52,13 @@ export default function Login() {
       }),
     ]).start();
   }, []);
+
+  // Clear errors when inputs change
+  useEffect(() => {
+    if (email) setEmailError("");
+    if (password) setPasswordError("");
+    clearError();
+  }, [email, password]);
 
   const validateEmail = (text) => {
     setEmail(text);
@@ -121,8 +131,19 @@ export default function Login() {
       return;
     }
 
-    setIsLoading(true);
-    setUser(true);
+    // Call the login function from AuthContext
+    const result = await login({ email, password });
+
+    if (result.success) {
+      // Login successful - navigation will be handled by the app flow
+      console.log("✅ Login successful, user:", result.user);
+      // You can add navigation here if needed, or let the app flow handle it
+      // navigation.navigate("Home");
+    } else {
+      // Login failed - error is already set in context
+      console.log("❌ Login failed:", result.error);
+      shakeAnimation();
+    }
   };
 
   const handleSocialLogin = (provider) => {
@@ -194,6 +215,18 @@ export default function Login() {
               style={{ transform: [{ translateX: shakeAnim }] }}
               className="px-6 flex-1"
             >
+              {/* Show context error if exists */}
+              {error && (
+                <View className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-4">
+                  <View className="flex-row items-center">
+                    <Feather name="alert-triangle" size={16} color="#DC143C" />
+                    <Text className="text-red-700 font-semibold text-sm ml-2">
+                      {error}
+                    </Text>
+                  </View>
+                </View>
+              )}
+
               {/* Email Input */}
               <View className="mb-5">
                 <Text className="text-gray-700 font-semibold mb-2 text-sm">
@@ -218,13 +251,14 @@ export default function Login() {
                     keyboardType="email-address"
                     autoCapitalize="none"
                     autoComplete="email"
-                    editable={!isLoading}
+                    editable={!loading}
                   />
                   {email && (
                     <TouchableOpacity
                       onPress={() => {
                         setEmail("");
                         setEmailError("");
+                        clearError();
                       }}
                     >
                       <Feather name="x" size={18} color="#9CA3AF" />
@@ -261,7 +295,7 @@ export default function Login() {
                     onChangeText={validatePassword}
                     secureTextEntry={!showPassword}
                     autoCapitalize="none"
-                    editable={!isLoading}
+                    editable={!loading}
                   />
                   <TouchableOpacity
                     onPress={() => setShowPassword(!showPassword)}
@@ -284,8 +318,13 @@ export default function Login() {
               <TouchableOpacity
                 onPress={handleForgotPassword}
                 className="self-end mb-6"
+                disabled={loading}
               >
-                <Text className="text-red-600 font-semibold text-sm">
+                <Text
+                  className={`font-semibold text-sm ${
+                    loading ? "text-gray-400" : "text-red-600"
+                  }`}
+                >
                   Forgot Password?
                 </Text>
               </TouchableOpacity>
@@ -293,13 +332,13 @@ export default function Login() {
               {/* Login Button */}
               <TouchableOpacity
                 onPress={handleLogin}
-                disabled={isLoading}
+                disabled={loading}
                 className={`rounded-2xl py-4 mb-6 shadow-lg ${
-                  isLoading ? "bg-red-400" : "bg-red-600"
+                  loading ? "bg-red-400" : "bg-red-600"
                 }`}
               >
                 <View className="flex-row items-center justify-center">
-                  {isLoading ? (
+                  {loading ? (
                     <>
                       <Feather name="loader" size={20} color="#FFFFFF" />
                       <Text className="text-white font-bold text-base ml-2">
@@ -330,20 +369,33 @@ export default function Login() {
               <View className="flex-row justify-between mb-8 gap-3">
                 <TouchableOpacity
                   onPress={() => handleSocialLogin("Google")}
-                  className="flex-1 bg-white border-2 border-gray-200 rounded-xl py-3.5 items-center"
+                  disabled={loading}
+                  className={`flex-1 border-2 rounded-xl py-3.5 items-center ${
+                    loading
+                      ? "bg-gray-100 border-gray-300"
+                      : "bg-white border-gray-200"
+                  }`}
                 >
-                  <Feather name="chrome" size={20} color="#374151" />
+                  <Feather
+                    name="chrome"
+                    size={20}
+                    color={loading ? "#9CA3AF" : "#374151"}
+                  />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => handleSocialLogin("Facebook")}
-                  className="flex-1 bg-blue-600 rounded-xl py-3.5 items-center"
+                  disabled={loading}
+                  className={`flex-1 rounded-xl py-3.5 items-center ${
+                    loading ? "bg-blue-400" : "bg-blue-600"
+                  }`}
                 >
                   <Feather name="facebook" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   onPress={() => handleSocialLogin("Apple")}
+                  disabled={loading}
                   className="flex-1 bg-black rounded-xl py-3.5 items-center"
                 >
                   <Feather name="smartphone" size={20} color="#FFFFFF" />
@@ -353,8 +405,15 @@ export default function Login() {
               {/* Sign Up Link */}
               <View className="flex-row justify-center items-center mb-8">
                 <Text className="text-gray-600 text-sm">New to Sugoyage? </Text>
-                <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
-                  <Text className="text-red-600 font-bold text-sm">
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("register")}
+                  disabled={loading}
+                >
+                  <Text
+                    className={`font-bold text-sm ${
+                      loading ? "text-gray-400" : "text-red-600"
+                    }`}
+                  >
                     Create Account
                   </Text>
                 </TouchableOpacity>

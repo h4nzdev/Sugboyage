@@ -2,9 +2,11 @@ import { View, Text, TouchableOpacity } from "react-native";
 import React from "react";
 import { Feather } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../../context/AuthenticationContext";
 
 export default function MainHeader() {
   const navigation = useNavigation();
+  const { user } = useAuth();
 
   return (
     <View className="px-5 pt-4 pb-3 bg-white border-b border-gray-200">
@@ -19,7 +21,7 @@ export default function MainHeader() {
               </Text>
             </View>
             <Text className="text-gray-900 font-bold text-base">
-              Hello Hanz! 👋
+              Hello {user.username}! 👋
             </Text>
           </View>
         </View>
