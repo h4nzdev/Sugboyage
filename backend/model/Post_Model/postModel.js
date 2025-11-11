@@ -114,4 +114,6 @@ postSchema.index({
   tags: "text",
 });
 
-module.exports = mongoose.model("Post", postSchema, "post");
+const Post = mongoose.model("Post", postSchema, "post");
+
+export default Post;
