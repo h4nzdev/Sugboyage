@@ -499,7 +499,14 @@ export default function Discover() {
               <View className="px-2 mb-6">
                 <View className="flex-col flex-wrap justify-between">
                   {filteredDestinations.map((destination) => (
-                    <GridCard key={destination.id} destination={destination} />
+                    <GridCard
+                      key={
+                        destination.id ||
+                        destination._id ||
+                        `destination-${index}`
+                      }
+                      destination={destination}
+                    />
                   ))}
                 </View>
               </View>

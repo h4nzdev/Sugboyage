@@ -110,7 +110,7 @@ export class AuthenticationService {
       console.log("🔄 UPDATE PROFILE API CALL:");
       console.log("   URL:", `${API_BASE_URL}/auth/profile/${userId}`);
       console.log("   User ID:", userId);
-      console.log("   Profile Data:", JSON.stringify(profileData, null, 2));
+      console.log("from services :", profileData);
 
       const response = await axios.put(
         `${API_BASE_URL}/auth/profile/${userId}`,

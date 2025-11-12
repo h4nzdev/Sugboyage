@@ -1,13 +1,18 @@
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ScreenWrapper } from "../../../components/Layout/ScreenWrapper";
+import { TripPlanService } from "../../../services/tripPlanService";
+import { useAuth } from "../../../context/AuthenticationContext";
 
 export default function TravelHub() {
   const [activeTab, setActiveTab] = useState("planner");
+  const [userTrips, setUserTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+  const { user } = useAuth();
 
   const colors = {
     primary: "#DC143C",
@@ -18,38 +23,36 @@ export default function TravelHub() {
     light: "#F7FAFC",
   };
 
-  // Sample itineraries
-  const savedItineraries = [
-    {
-      id: 1,
-      title: "Cebu Weekend Getaway",
-      duration: "3 days",
-      date: "Dec 15-17, 2024",
-      spots: 8,
-      progress: 3,
-      total: 8,
-    },
-    {
-      id: 2,
-      title: "Cultural Heritage Tour",
-      duration: "2 days",
-      date: "Jan 5-6, 2025",
-      spots: 6,
-      progress: 1,
-      total: 6,
-    },
-    {
-      id: 3,
-      title: "Beach & Island Hopping",
-      duration: "4 days",
-      date: "Feb 20-23, 2025",
-      spots: 5,
-      progress: 0,
-      total: 5,
-    },
-  ];
+  // 🎯 FETCH USER'S REAL TRIPS FROM DATABASE
+  useEffect(() => {
+    if (user) {
+      loadUserTrips();
+    }
+  }, [user]);
 
-  // Sample flights
+  const loadUserTrips = async () => {
+    try {
+      setLoading(true);
+      console.log("📂 Loading user trips...");
+
+      const result = await TripPlanService.getUserTrips(user.id);
+
+      if (result.success) {
+        console.log("✅ Found", result.trips.length, "trips");
+        setUserTrips(result.trips);
+      } else {
+        console.log("❌ No trips found");
+        setUserTrips([]);
+      }
+    } catch (error) {
+      console.error("❌ Error loading trips:", error);
+      Alert.alert("Error", "Failed to load your trips");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Sample flights (keeping this for now)
   const flightDeals = [
     {
       id: 1,
@@ -67,15 +70,6 @@ export default function TravelHub() {
       price: "₱1,899",
       date: "Dec 20, 2024",
       duration: "1h 15m",
-      stops: "Direct",
-    },
-    {
-      id: 3,
-      airline: "AirAsia",
-      route: "Davao → Cebu",
-      price: "₱2,199",
-      date: "Jan 10, 2025",
-      duration: "1h 45m",
       stops: "Direct",
     },
   ];
@@ -112,6 +106,27 @@ export default function TravelHub() {
     },
   ];
 
+  // 🎯 FORMAT DATE FOR DISPLAY
+  const formatDate = (dateString) => {
+    if (!dateString) return "Flexible dates";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  // 🎯 CALCULATE TOTAL ACTIVITIES
+  const calculateTotalActivities = (trip) => {
+    return (
+      trip.days?.reduce(
+        (total, day) => total + (day.activities?.length || 0),
+        0
+      ) || 0
+    );
+  };
+
   return (
     <ScreenWrapper className="flex-1 bg-gray-50">
       {/* Header */}
@@ -125,8 +140,11 @@ export default function TravelHub() {
               Plan • Book • Explore
             </Text>
           </View>
-          <TouchableOpacity className="p-2 bg-gray-100 rounded-xl">
-            <Feather name="search" size={20} color={colors.text} />
+          <TouchableOpacity
+            onPress={loadUserTrips}
+            className="p-2 bg-gray-100 rounded-xl"
+          >
+            <Feather name="refresh-cw" size={20} color={colors.text} />
           </TouchableOpacity>
         </View>
       </View>
@@ -206,83 +224,127 @@ export default function TravelHub() {
               <Text className="text-lg font-bold text-gray-900">
                 My Itineraries
               </Text>
-              <TouchableOpacity>
+              <TouchableOpacity onPress={loadUserTrips}>
                 <Text className="text-red-600 text-sm font-semibold">
-                  View All
+                  {loading ? "Loading..." : "Refresh"}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {savedItineraries.map((itinerary) => (
-              <TouchableOpacity
-                key={itinerary.id}
-                className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm mb-3"
-              >
-                <View className="flex-row items-start justify-between mb-3">
-                  <View className="flex-1">
-                    <Text className="font-bold text-gray-900 text-base mb-1">
-                      {itinerary.title}
-                    </Text>
-                    <View className="flex-row items-center space-x-3">
-                      <View className="flex-row items-center">
-                        <Feather
-                          name="calendar"
-                          size={12}
-                          color={colors.muted}
-                        />
-                        <Text className="text-gray-500 text-xs ml-1">
-                          {itinerary.duration}
+            {/* 🎯 REAL TRIPS FROM DATABASE */}
+            {loading ? (
+              <View className="items-center py-8">
+                <Text className="text-gray-500">Loading your trips...</Text>
+              </View>
+            ) : userTrips.length === 0 ? (
+              <View className="items-center py-8 bg-white rounded-2xl p-6 border border-gray-200">
+                <Feather name="map" size={48} color={colors.muted} />
+                <Text className="text-gray-500 text-lg mt-4 text-center">
+                  No trips yet
+                </Text>
+                <Text className="text-gray-400 text-sm mt-2 text-center">
+                  Create your first trip with AI Planner!
+                </Text>
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("ai")}
+                  className="bg-red-600 py-3 px-6 rounded-xl mt-4"
+                >
+                  <Text className="text-white font-semibold">Plan with AI</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              userTrips.map((trip) => {
+                const totalActivities = calculateTotalActivities(trip);
+                const completedActivities =
+                  trip.progress?.completedActivities || 0;
+                const completionPercentage =
+                  trip.progress?.completionPercentage || 0;
+
+                return (
+                  <TouchableOpacity
+                    key={trip._id}
+                    className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm mb-3"
+                    onPress={() =>
+                      navigation.navigate("TripDetail", { tripId: trip._id })
+                    }
+                  >
+                    <View className="flex-row items-start justify-between mb-3">
+                      <View className="flex-1">
+                        <Text className="font-bold text-gray-900 text-base mb-1">
+                          {trip.title}
                         </Text>
+                        <View className="flex-row items-center space-x-3">
+                          <View className="flex-row items-center">
+                            <Feather
+                              name="calendar"
+                              size={12}
+                              color={colors.muted}
+                            />
+                            <Text className="text-gray-500 text-xs ml-1">
+                              {trip.duration?.days || 0} days
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center">
+                            <Feather
+                              name="map-pin"
+                              size={12}
+                              color={colors.muted}
+                            />
+                            <Text className="text-gray-500 text-xs ml-1">
+                              {totalActivities} activities
+                            </Text>
+                          </View>
+                        </View>
                       </View>
-                      <View className="flex-row items-center">
-                        <Feather
-                          name="map-pin"
-                          size={12}
-                          color={colors.muted}
-                        />
-                        <Text className="text-gray-500 text-xs ml-1">
-                          {itinerary.spots} spots
+                      <View className="bg-red-50 px-2 py-1 rounded-full">
+                        <Text className="text-red-700 text-xs font-semibold">
+                          {trip.budget?.total || "Flexible budget"}
                         </Text>
                       </View>
                     </View>
-                  </View>
-                  <View className="bg-red-50 px-2 py-1 rounded-full">
-                    <Text className="text-red-700 text-xs font-semibold">
-                      {itinerary.date}
-                    </Text>
-                  </View>
-                </View>
 
-                {/* Progress Bar */}
-                <View className="mb-2">
-                  <View className="w-full bg-gray-200 rounded-full h-2">
-                    <View
-                      className="bg-red-600 h-2 rounded-full"
-                      style={{
-                        width: `${(itinerary.progress / itinerary.total) * 100}%`,
-                      }}
-                    />
-                  </View>
-                  <Text className="text-gray-500 text-xs mt-1">
-                    {itinerary.progress} of {itinerary.total} activities planned
-                  </Text>
-                </View>
+                    {/* Progress Bar */}
+                    <View className="mb-2">
+                      <View className="w-full bg-gray-200 rounded-full h-2">
+                        <View
+                          className="bg-red-600 h-2 rounded-full"
+                          style={{
+                            width: `${completionPercentage}%`,
+                          }}
+                        />
+                      </View>
+                      <Text className="text-gray-500 text-xs mt-1">
+                        {completedActivities} of {totalActivities} activities
+                        completed
+                      </Text>
+                    </View>
 
-                <View className="flex-row justify-between">
-                  <TouchableOpacity className="flex-1 bg-red-600 py-2 rounded-xl mr-2">
-                    <Text className="text-white text-center text-sm font-semibold">
-                      Continue Planning
-                    </Text>
+                    <View className="flex-row justify-between">
+                      <TouchableOpacity
+                        className="flex-1 bg-red-600 py-2 rounded-xl mr-2"
+                        onPress={() =>
+                          navigation.navigate("trip-details", {
+                            tripId: trip._id,
+                          })
+                        }
+                      >
+                        <Text className="text-white text-center text-sm font-semibold">
+                          {completionPercentage === 100
+                            ? "View Trip"
+                            : "Continue Planning"}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-xl items-center justify-center">
+                        <Feather name="share-2" size={16} color={colors.text} />
+                      </TouchableOpacity>
+                    </View>
                   </TouchableOpacity>
-                  <TouchableOpacity className="w-10 h-10 bg-gray-100 rounded-xl items-center justify-center">
-                    <Feather name="share-2" size={16} color={colors.text} />
-                  </TouchableOpacity>
-                </View>
-              </TouchableOpacity>
-            ))}
+                );
+              })
+            )}
           </View>
         ) : (
-          /* FLIGHTS TAB */
+          /* FLIGHTS TAB (Unchanged) */
           <View className="p-4">
             {/* Quick Search */}
             <View className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm mb-6">

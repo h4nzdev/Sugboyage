@@ -340,7 +340,9 @@ export default function Login() {
                 <View className="flex-row items-center justify-center">
                   {loading ? (
                     <>
-                      <Feather name="loader" size={20} color="#FFFFFF" />
+                      <View className="items-center justify-center animate-spin">
+                        <Feather name="loader" size={20} color="#FFFFFF" />
+                      </View>
                       <Text className="text-white font-bold text-base ml-2">
                         Signing In...
                       </Text>

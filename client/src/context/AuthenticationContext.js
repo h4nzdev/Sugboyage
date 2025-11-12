@@ -207,6 +207,7 @@ export const AuthProvider = ({ children }) => {
   const value = {
     // State
     user,
+    setUser,
     loading,
     error,
 

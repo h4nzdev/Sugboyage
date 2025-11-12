@@ -18,6 +18,7 @@ import cebu from "../../../../assets/homepage_photos/cebu.png";
 import MainHeader from "../../../components/Header/MainHeader";
 import { useNavigation } from "@react-navigation/native";
 import { useNotification } from "../../../context/NotificationContext";
+import LiveStatus from "./LiveStatus";
 
 const { width } = Dimensions.get("window");
 
@@ -192,7 +193,7 @@ const AttractionList = ({ spots, onSpotPress, isLoading }) => {
       >
         {spots.map((spot, index) => (
           <TouchableOpacity
-            key={spot.id}
+            key={spot.id || spot._id || `spot-${index}`}
             className="bg-white rounded-2xl overflow-hidden w-72 shadow-lg active:scale-95 border border-gray-100"
             onPress={() =>
               navigation.navigate("detailed-info", { spotId: spot._id })
@@ -243,114 +244,6 @@ const AttractionList = ({ spots, onSpotPress, isLoading }) => {
   );
 };
 
-// Live Status Component (Replaces Quick Actions)
-const LiveStatus = () => {
-  const navigation = useNavigation();
-
-  const statusItems = [
-    {
-      id: "weather", // Add unique id
-      icon: "sun",
-      title: "Weather",
-      subtitle: "32°C • Sunny",
-      status: "perfect",
-      color: "#F59E0B",
-      detail: "Ideal for beaches",
-    },
-    {
-      id: "traffic", // Add unique id
-      icon: "trending-up",
-      title: "Traffic",
-      subtitle: "Light • 15min",
-      status: "good",
-      color: "#059669",
-      detail: "Clear to city center",
-    },
-    {
-      id: "crowds", // Add unique id
-      icon: "users",
-      title: "Crowds",
-      subtitle: "Moderate",
-      status: "moderate",
-      color: "#D97706",
-      detail: "Peak: 11AM-2PM",
-    },
-    {
-      id: "best-time", // Add unique id
-      icon: "clock",
-      title: "Best Time",
-      subtitle: "3-5PM",
-      status: "recommended",
-      color: "#7C3AED",
-      detail: "Golden hour photos",
-    },
-  ];
-
-  const getStatusColor = (status) => {
-    const colors = {
-      perfect: "#10B981",
-      good: "#059669",
-      moderate: "#F59E0B",
-      recommended: "#8B5CF6",
-    };
-    return colors[status] || "#6B7280";
-  };
-
-  return (
-    <View className="px-4 mb-8">
-      <View className="flex-row items-center justify-between mb-4">
-        <View className="flex-row items-center">
-          <Feather name="activity" size={20} color={colors.primary} />
-          <Text className="text-xl font-bold text-gray-800 ml-2">
-            Live Status
-          </Text>
-        </View>
-        <View className="flex-row items-center">
-          <View className="w-2 h-2 bg-green-500 rounded-full mr-1" />
-          <Text className="text-green-600 text-xs font-semibold">LIVE</Text>
-        </View>
-      </View>
-
-      <View className="flex-row justify-between">
-        {statusItems.map((item) => (
-          <TouchableOpacity
-            key={item.id} // Use the unique id here
-            className="items-center active:scale-95"
-          >
-            <View
-              className="w-16 h-16 rounded-2xl items-center justify-center"
-              style={{
-                backgroundColor: `${item.color}15`,
-                borderColor: `${item.color}30`,
-              }}
-            >
-              <Feather name={item.icon} size={24} color={item.color} />
-            </View>
-            <Text className="font-semibold text-gray-800 text-sm text-center mb-1">
-              {item.title}
-            </Text>
-            <Text className="text-gray-500 text-xs text-center">
-              {item.subtitle}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Quick Status Bar */}
-      <View className="bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-3 mt-3 border border-green-200">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <Feather name="check-circle" size={16} color="#059669" />
-            <Text className="text-green-700 text-sm font-semibold ml-2">
-              Perfect day for exploration!
-            </Text>
-          </View>
-          <Text className="text-green-600 text-xs">Updated just now</Text>
-        </View>
-      </View>
-    </View>
-  );
-};
 // Main Home Component
 export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -406,6 +299,7 @@ export default function Home() {
         contentContainerStyle={{ paddingBottom: 30 }}
       >
         <MainHeader />
+        <LiveStatus />
         <HeroBanner />
         <CategoryTabs
           selectedCategory={selectedCategory}
@@ -416,7 +310,6 @@ export default function Home() {
           onSpotPress={handleSpotPress}
           isLoading={isLoading}
         />
-        <LiveStatus />
         <MapSection spots={filteredSpots} onSpotPress={handleSpotPress} />
       </ScrollView>
     </ScreenWrapper>

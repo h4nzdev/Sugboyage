@@ -15,6 +15,9 @@ import DetailedInfo from "../screens/Main/DetailedInfo/DetailedInfo";
 import AIPlanner from "../screens/Main/AIChatbot/AIPlanner";
 import SocialFeed from "../screens/Main/SocialFeed/SocialFeed";
 import TravelHub from "../screens/Main/TravelHub/TravelHub";
+import AddPost from "../screens/Main/SocialFeed/AddPost";
+import UserProfile from "../screens/Main/Profile/UserProfile";
+import TripDetails from "../screens/Main/TravelHub/TripDetails";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -41,13 +44,32 @@ function TabNavigation() {
 export default function AppNavigation() {
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: "none",
+          animationEnabled: false,
+          gestureEnabled: false,
+          transitionSpec: {
+            open: { animation: "timing", config: { duration: 0 } },
+            close: { animation: "timing", config: { duration: 0 } },
+          },
+          cardStyleInterpolator: ({ current }) => ({
+            cardStyle: {
+              opacity: current.progress,
+            },
+          }),
+        }}
+      >
         <Stack.Screen name="MainTabs" component={TabNavigation} />
         <Stack.Screen name="map" component={Map} />
         <Stack.Screen name="ai" component={AIPlanner} />
         <Stack.Screen name="profile" component={Profile} />
         <Stack.Screen name="settings" component={Settings} />
         <Stack.Screen name="detailed-info" component={DetailedInfo} />
+        <Stack.Screen name="add-post" component={AddPost} />
+        <Stack.Screen name="user-profile" component={UserProfile} />
+        <Stack.Screen name="trip-details" component={TripDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );
