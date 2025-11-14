@@ -130,7 +130,15 @@ export const tripPlanController = {
     try {
       const { tripId, dayIndex, activityIndex } = req.params;
 
-      console.log("✅ Marking activity completed");
+      console.log("✅ Marking activity completed for:", {
+        tripId,
+        dayIndex,
+        activityIndex,
+      });
+
+      // Convert to numbers
+      const dayIdx = parseInt(dayIndex);
+      const activityIdx = parseInt(activityIndex);
 
       const trip = await TripPlan.findById(tripId);
 
@@ -141,10 +149,56 @@ export const tripPlanController = {
         });
       }
 
+      console.log("📋 Current trip days:", trip.days.length);
+      console.log(
+        "📋 Activities in day:",
+        trip.days[dayIdx]?.activities?.length
+      );
+
+      // Check if indices are valid
+      if (!trip.days[dayIdx] || !trip.days[dayIdx].activities[activityIdx]) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid day or activity index",
+        });
+      }
+
       // Mark activity as completed
-      trip.days[dayIndex].activities[activityIndex].isCompleted = true;
+      trip.days[dayIdx].activities[activityIdx].isCompleted = true;
+
+      console.log(
+        "🔄 Before save - Activity completed:",
+        trip.days[dayIdx].activities[activityIdx].isCompleted
+      );
+
+      // Force progress recalculation
+      const totalActivities = trip.days.reduce(
+        (total, day) => total + day.activities.length,
+        0
+      );
+      const completedActivities = trip.days.reduce(
+        (total, day) =>
+          total + day.activities.filter((act) => act.isCompleted).length,
+        0
+      );
+
+      trip.progress = {
+        plannedActivities: totalActivities,
+        completedActivities: completedActivities,
+        completionPercentage: Math.round(
+          (completedActivities / totalActivities) * 100
+        ),
+      };
+
+      console.log("📊 Progress recalculated:", trip.progress);
 
       const updatedTrip = await trip.save();
+
+      console.log(
+        "💾 After save - Activity completed:",
+        updatedTrip.days[dayIdx].activities[activityIdx].isCompleted
+      );
+      console.log("💾 After save - Progress:", updatedTrip.progress);
 
       res.json({
         success: true,
