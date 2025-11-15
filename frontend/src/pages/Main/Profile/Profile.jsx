@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import ProfileMobile from "../../Mobile/ProfileMobile";
 import ProfileDesktop from "../../Desktop/ProfileDesktop";
 import { AuthenticationContext } from "../../../context/AuthenticationContext";
-import { PostService } from "../../../services/PostService";
+import { PostService } from "../../../services/postService";
 import { AuthenticationService } from "../../../services/authenticationService";
 import EditProfileModal from "./components/EditProfileModal";
 

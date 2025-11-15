@@ -15,7 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import CommentModal from "../../components/SocialFeed/CommentModal";
 import { AuthenticationContext } from "../../context/AuthenticationContext";
-import { PostService } from "../../services/PostService";
+import { PostService } from "../../services/postService";
 
 const SocialFeedMobile = ({
   posts,

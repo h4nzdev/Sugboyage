@@ -14,7 +14,7 @@ import {
   Globe,
   Mail,
 } from "lucide-react";
-import { PostService } from "../../../services/PostService";
+import { PostService } from "../../../services/postService";
 import { AuthenticationService } from "../../../services/authenticationService";
 
 const UserProfileView = () => {
