@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AuthenticationContext } from "../../context/AuthenticationContext";
+import logo from "../../assets/logo.png";
 
 export default function DesktopSidebar() {
   const navigate = useNavigate();
@@ -96,10 +97,10 @@ export default function DesktopSidebar() {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">C</span>
+            <img src={logo} />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-900">CebuExplorer</h1>
+            <h1 className="text-xl font-bold text-gray-900">SugVoyage</h1>
             <p className="text-sm text-gray-500">Travel Guide</p>
           </div>
         </div>

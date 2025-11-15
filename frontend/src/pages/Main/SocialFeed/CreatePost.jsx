@@ -40,6 +40,7 @@ const CreatePost = () => {
     visibility: "public",
   });
   const [currentTag, setCurrentTag] = useState("");
+  const [selectedImages, setSelectedImages] = useState([]);
 
   const colors = {
     primary: "#DC143C",
@@ -75,6 +76,24 @@ const CreatePost = () => {
     "Larsian BBQ, Cebu City",
     "Sutukil, Mactan",
   ];
+
+  const handleImageSelect = (event) => {
+    const files = Array.from(event.target.files);
+    const newImages = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      name: file.name,
+    }));
+    setSelectedImages((prev) => [...prev, ...newImages]);
+  };
+
+  const removeImage = (index) => {
+    setSelectedImages((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      URL.revokeObjectURL(prev[index].preview);
+      return updated;
+    });
+  };
 
   const handleInputChange = (field, value) => {
     if (field === "locationName") {
@@ -135,37 +154,43 @@ const CreatePost = () => {
     }
 
     setLoading(true);
-    // Simulate API call
+
     try {
-      const postData = {
-        author: user.id,
-        content: formData.content.trim(),
-        location: {
-          name: formData.location.name.trim(),
-          coordinates: formData.location.coordinates,
-          address: formData.location.name.trim(),
-        },
-        category: formData.category,
-        tags: formData.tags,
-        visibility: formData.visibility,
-        media: {
-          images: [],
-          videos: [],
-        },
-      };
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
 
-      console.log("🔄 Creating post:", postData);
+      // Append post data as individual fields (not JSON)
+      formDataToSend.append("author", user.id);
+      formDataToSend.append("content", formData.content.trim());
+      formDataToSend.append("location[name]", formData.location.name.trim());
+      formDataToSend.append("category", formData.category);
+      formDataToSend.append("visibility", formData.visibility);
 
-      const result = await PostService.createPost(postData);
+      // Append tags as individual fields
+      formData.tags.forEach((tag) => {
+        formDataToSend.append("tags[]", tag);
+      });
+
+      // Append images if any
+      selectedImages.forEach((image, index) => {
+        formDataToSend.append("images", image.file);
+      });
+
+      console.log("🔄 Creating post with images...");
+
+      const result = await PostService.createPost(formDataToSend);
 
       if (result.success) {
-        alert("Success");
+        alert("Post created successfully!");
+        // Clean up preview URLs
+        selectedImages.forEach((image) => URL.revokeObjectURL(image.preview));
         navigate(-1);
       } else {
-        alert("Failed");
+        alert(`Failed: ${result.message}`);
       }
     } catch (error) {
       console.error("❌ Error creating post:", error);
+      alert("Error creating post. Check console for details.");
     } finally {
       setLoading(false);
     }
@@ -232,6 +257,34 @@ const CreatePost = () => {
                 </div>
               </div>
 
+              {selectedImages.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Image Preview
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {selectedImages.map((image, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={image.preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        <span className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                          {index + 1}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Content Input */}
               <div className="mb-6">
                 <textarea
@@ -243,9 +296,17 @@ const CreatePost = () => {
                 />
                 <div className="flex justify-between items-center mt-2">
                   <div className="flex items-center space-x-2 text-gray-400">
-                    <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                    {/* Image Upload Button */}
+                    <label className="p-2 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer">
                       <ImageIcon className="w-5 h-5" />
-                    </button>
+                      <input
+                        type="file"
+                        multiple
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                        className="hidden"
+                      />
+                    </label>
                     <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                       <Camera className="w-5 h-5" />
                     </button>
@@ -260,6 +321,12 @@ const CreatePost = () => {
                     {characterCount}/{maxCharacters}
                   </span>
                 </div>
+                {selectedImages.length > 0 && (
+                  <p className="text-sm text-gray-500 mt-2">
+                    {selectedImages.length} image(s) selected - will be uploaded
+                    when you click "Post"
+                  </p>
+                )}
               </div>
 
               {/* Category Selection */}

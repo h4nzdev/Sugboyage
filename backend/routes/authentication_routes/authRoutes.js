@@ -3,16 +3,14 @@ import { AuthController } from "../../controller/auth_controller/authentication.
 
 const authRouter = express.Router();
 
-// Register new user
-authRouter.post("/register", AuthController.register);
+// NEW ROUTE - Send verification code
+authRouter.post("/send-verification", AuthController.sendVerification);
 
-// Login user
+// EXISTING ROUTES
+authRouter.post("/register", AuthController.register); // Now requires verificationCode
 authRouter.post("/login", AuthController.login);
-
-// Get user profile by ID
 authRouter.get("/profile/:userId", AuthController.getProfile);
-
-// Update user profile by ID
 authRouter.put("/profile/:userId", AuthController.updateProfile);
+authRouter.get("/users", AuthController.getAllUsers);
 
 export default authRouter;

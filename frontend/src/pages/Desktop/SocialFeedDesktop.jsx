@@ -20,9 +20,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import CommentModal from "../../components/SocialFeed/CommentModal";
 import { AuthenticationContext } from "../../context/AuthenticationContext";
-import { PostService } from "../../services/postService";
+import { PostService } from "../../services/PostService";
+import { useEffect } from "react";
 
-const SocialFeedDesktop = ({ posts = [] }) => {
+const SocialFeedDesktop = ({ posts = [], users }) => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [commentInputs, setCommentInputs] = useState({});
   const [likedPosts, setLikedPosts] = useState({});
@@ -36,6 +37,22 @@ const SocialFeedDesktop = ({ posts = [] }) => {
     primary: "#DC143C",
     primaryLight: "#FEE2E2",
   };
+
+  useEffect(() => {
+    const initialLikedState = {};
+    posts.forEach((post) => {
+      const userLikedThisPost = post.engagement?.likedBy?.some(
+        (likedUser) => likedUser._id === user?.id
+      );
+
+      if (userLikedThisPost) {
+        initialLikedState[post._id] = true;
+      }
+    });
+
+    console.log("🔄 Initializing likedPosts:", initialLikedState);
+    setLikedPosts(initialLikedState);
+  }, [posts, user?.id]);
 
   // Navigation items
   const navItems = [
@@ -65,15 +82,26 @@ const SocialFeedDesktop = ({ posts = [] }) => {
   };
 
   // Handle like function
+  // In your handleLike function
   const handleLike = async (postId) => {
     try {
       setLikedPosts((prev) => ({
         ...prev,
         [postId]: !prev[postId],
       }));
-      const response = await PostService.likePost(postId);
+
+      const response = await PostService.likePost(postId, { userId: user.id });
+
+      if (!response.success) {
+        // Revert if failed
+        setLikedPosts((prev) => ({
+          ...prev,
+          [postId]: !prev[postId],
+        }));
+      }
     } catch (error) {
       console.error("Error liking post:", error);
+      // Revert on error
       setLikedPosts((prev) => ({
         ...prev,
         [postId]: !prev[postId],
@@ -154,7 +182,10 @@ const SocialFeedDesktop = ({ posts = [] }) => {
               {getUserAvatar(post)}
             </div>
             <div>
-              <div className="flex items-center gap-1">
+              <div
+                onClick={() => navigate(`/main/profile/${post.author._id}`)}
+                className="flex items-center gap-1 cursor-pointer hover:underline"
+              >
                 <span className="font-semibold text-sm">
                   {getDisplayName(post)}
                 </span>
@@ -203,14 +234,59 @@ const SocialFeedDesktop = ({ posts = [] }) => {
 
         {/* Media - Only show if images exist (Facebook style) */}
         {hasMedia(post) && (
-          <div className="bg-gray-100 h-80 flex items-center justify-center border-y border-gray-200">
-            <div className="text-center">
-              <span className="text-4xl mb-2 block">🖼️</span>
-              <span className="text-gray-500 text-sm">
-                {post.media.images.length} photo
-                {post.media.images.length > 1 ? "s" : ""}
-              </span>
-            </div>
+          <div className="border-y border-gray-200">
+            {post.media.images.length === 1 ? (
+              // Single image - full width with proper aspect ratio
+              <div className="w-full">
+                <img
+                  src={post.media.images[0].url}
+                  alt={post.media.images[0].caption || "Post image"}
+                  className="w-full max-h-96 object-contain bg-gray-50"
+                />
+              </div>
+            ) : post.media.images.length === 2 ? (
+              // Two images - side by side
+              <div className="flex h-80">
+                <img
+                  src={post.media.images[0].url}
+                  alt={post.media.images[0].caption || "Post image 1"}
+                  className="w-1/2 h-full object-cover border-r border-gray-200"
+                />
+                <img
+                  src={post.media.images[1].url}
+                  alt={post.media.images[1].caption || "Post image 2"}
+                  className="w-1/2 h-full object-cover"
+                />
+              </div>
+            ) : post.media.images.length >= 3 ? (
+              // Three or more images - grid layout
+              <div className="grid grid-cols-2 gap-1 h-80">
+                <img
+                  src={post.media.images[0].url}
+                  alt={post.media.images[0].caption || "Post image 1"}
+                  className="col-span-2 h-40 object-cover"
+                />
+                <img
+                  src={post.media.images[1].url}
+                  alt={post.media.images[1].caption || "Post image 2"}
+                  className="h-40 object-cover"
+                />
+                <div className="relative h-40">
+                  <img
+                    src={post.media.images[2].url}
+                    alt={post.media.images[2].caption || "Post image 3"}
+                    className="w-full h-full object-cover"
+                  />
+                  {post.media.images.length > 3 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <span className="text-white font-bold text-lg">
+                        +{post.media.images.length - 3}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -241,7 +317,7 @@ const SocialFeedDesktop = ({ posts = [] }) => {
                   isLiked ? "text-red-600" : "text-gray-600"
                 }`}
               >
-                {(post.engagement?.likes || 0) + (isLiked ? 1 : 0)}
+                {post.engagement?.likes || 0}
               </span>
             </button>
 
@@ -303,50 +379,6 @@ const SocialFeedDesktop = ({ posts = [] }) => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Left Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 min-h-screen p-6 fixed left-0 top-0 h-full">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Sugoyage</h1>
-          <p className="text-red-600 text-sm font-semibold">Community</p>
-        </div>
-
-        <nav className="space-y-2">
-          {navItems.map((item) => (
-            <button
-              key={item.id}
-              className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
-                item.active
-                  ? "font-semibold bg-red-50 text-red-600 border border-red-100"
-                  : "text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              <item.icon className="w-5 h-5" />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        {/* User Profile */}
-        <div className="absolute bottom-6 left-6 right-6">
-          <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer">
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm"
-              style={{ backgroundColor: colors.primary }}
-            >
-              {user?.profile?.avatar || "U"}
-            </div>
-            <div className="flex-1">
-              <div className="font-semibold text-sm">
-                {user?.profile?.displayName || "Your Profile"}
-              </div>
-              <div className="text-xs text-gray-500">
-                @{user?.username || "username"}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 ml-44 max-w-4xl mx-auto py-6">
         {/* Search Bar */}
@@ -458,19 +490,23 @@ const SocialFeedDesktop = ({ posts = [] }) => {
             </button>
           </div>
           <div className="space-y-4">
-            {[1, 2, 3].map((item) => (
-              <div key={item} className="flex items-center justify-between">
+            {users.map((user) => (
+              <div key={user._id} className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
                     style={{ backgroundColor: colors.primary }}
                   >
-                    {String.fromCharCode(64 + item)}
+                    {user.profile?.displayName?.charAt(0) ||
+                      user.username?.charAt(0) ||
+                      "U"}
                   </div>
                   <div>
-                    <div className="font-semibold text-sm">Traveler {item}</div>
+                    <div className="font-semibold text-sm">
+                      {user.profile?.displayName || `User ${user.username}`}
+                    </div>
                     <div className="text-gray-500 text-xs">
-                      Suggested for you
+                      @{user.username}
                     </div>
                   </div>
                 </div>
@@ -494,7 +530,7 @@ const SocialFeedDesktop = ({ posts = [] }) => {
               </button>
             ))}
           </div>
-          <div>© 2024 Sugoyage</div>
+          <div>© 2025 Sugoyage</div>
         </div>
       </div>
 

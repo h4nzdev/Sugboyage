@@ -6,7 +6,6 @@ export class CommentService {
   // Add comment to a post
   static async addComment(postId, commentData) {
     try {
-      console.log(`🔄 Adding comment to post ${postId}...`);
       const response = await axios.post(
         `${API_BASE_URL}/comments/posts/${postId}/comments`,
         commentData
@@ -14,7 +13,7 @@ export class CommentService {
       console.log("✅ Comment added successfully!");
       return response.data;
     } catch (error) {
-      console.error("❌ Error adding comment:", error.message);
+      console.error("Error adding comment:", error.message);
       return {
         success: false,
         message: error.response?.data?.message || "Failed to add comment",
@@ -26,7 +25,7 @@ export class CommentService {
   // Get comments for a post
   static async getPostComments(postId, options = {}) {
     try {
-      console.log(`🔄 Fetching comments for post ${postId}...`);
+      console.log(`Fetching comments for post ${postId}...`);
       const {
         page = 1,
         limit = 20,
@@ -40,11 +39,10 @@ export class CommentService {
           params: { page, limit, sort, includeReplies },
         }
       );
-      console.log("✅ Comments fetched successfully!");
       return response.data;
     } catch (error) {
       console.error(
-        `❌ Error fetching comments for post ${postId}:`,
+        `Error fetching comments for post ${postId}:`,
         error.message
       );
       return {
@@ -59,14 +57,12 @@ export class CommentService {
   // Get comment by ID
   static async getCommentById(commentId) {
     try {
-      console.log(`🔄 Fetching comment ${commentId}...`);
       const response = await axios.get(
         `${API_BASE_URL}/comments/comments/${commentId}`
       );
-      console.log("✅ Comment fetched successfully!");
       return response.data;
     } catch (error) {
-      console.error(`❌ Error fetching comment ${commentId}:`, error.message);
+      console.error(`Error fetching comment ${commentId}:`, error.message);
       return {
         success: false,
         message: error.response?.data?.message || "Comment not found",
@@ -78,7 +74,6 @@ export class CommentService {
   // Get replies for a comment
   static async getCommentReplies(commentId, options = {}) {
     try {
-      console.log(`🔄 Fetching replies for comment ${commentId}...`);
       const { page = 1, limit = 20 } = options;
 
       const response = await axios.get(
@@ -87,11 +82,10 @@ export class CommentService {
           params: { page, limit },
         }
       );
-      console.log("✅ Comment replies fetched successfully!");
       return response.data;
     } catch (error) {
       console.error(
-        `❌ Error fetching replies for comment ${commentId}:`,
+        `Error fetching replies for comment ${commentId}:`,
         error.message
       );
       return {
@@ -106,15 +100,13 @@ export class CommentService {
   // Update a comment
   static async updateComment(commentId, updateData) {
     try {
-      console.log(`🔄 Updating comment ${commentId}...`);
       const response = await axios.put(
         `${API_BASE_URL}/comments/comments/${commentId}`,
         updateData
       );
-      console.log("✅ Comment updated successfully!");
       return response.data;
     } catch (error) {
-      console.error(`❌ Error updating comment ${commentId}:`, error.message);
+      console.error(`Error updating comment ${commentId}:`, error.message);
       return {
         success: false,
         message: error.response?.data?.message || "Failed to update comment",
@@ -126,14 +118,12 @@ export class CommentService {
   // Delete a comment
   static async deleteComment(commentId) {
     try {
-      console.log(`🔄 Deleting comment ${commentId}...`);
       const response = await axios.delete(
         `${API_BASE_URL}/comments/comments/${commentId}`
       );
-      console.log("✅ Comment deleted successfully!");
       return response.data;
     } catch (error) {
-      console.error(`❌ Error deleting comment ${commentId}:`, error.message);
+      console.error(`Error deleting comment ${commentId}:`, error.message);
       return {
         success: false,
         message: error.response?.data?.message || "Failed to delete comment",
@@ -145,14 +135,13 @@ export class CommentService {
   // Like a comment
   static async likeComment(commentId) {
     try {
-      console.log(`🔄 Liking comment ${commentId}...`);
       const response = await axios.post(
         `${API_BASE_URL}/comments/comments/${commentId}/like`
       );
       console.log("✅ Comment liked successfully!");
       return response.data;
     } catch (error) {
-      console.error(`❌ Error liking comment ${commentId}:`, error.message);
+      console.error(`Error liking comment ${commentId}:`, error.message);
       return {
         success: false,
         message: error.response?.data?.message || "Failed to like comment",
@@ -164,14 +153,12 @@ export class CommentService {
   // Unlike a comment
   static async unlikeComment(commentId) {
     try {
-      console.log(`🔄 Unliking comment ${commentId}...`);
       const response = await axios.post(
         `${API_BASE_URL}/comments/comments/${commentId}/unlike`
       );
-      console.log("✅ Comment unliked successfully!");
       return response.data;
     } catch (error) {
-      console.error(`❌ Error unliking comment ${commentId}:`, error.message);
+      console.error(`Error unliking comment ${commentId}:`, error.message);
       return {
         success: false,
         message: error.response?.data?.message || "Failed to unlike comment",
@@ -183,15 +170,13 @@ export class CommentService {
   // Get comment statistics for a post
   static async getCommentStats(postId) {
     try {
-      console.log(`🔄 Fetching comment stats for post ${postId}...`);
       const response = await axios.get(
         `${API_BASE_URL}/comments/posts/${postId}/stats`
       );
-      console.log("✅ Comment stats fetched successfully!");
       return response.data;
     } catch (error) {
       console.error(
-        `❌ Error fetching comment stats for post ${postId}:`,
+        `Error fetching comment stats for post ${postId}:`,
         error.message
       );
       return {
@@ -206,16 +191,14 @@ export class CommentService {
   // Add reply to a comment
   static async addReply(commentId, replyData) {
     try {
-      console.log(`🔄 Adding reply to comment ${commentId}...`);
       const response = await axios.post(
         `${API_BASE_URL}/comments/comments/${commentId}/replies`,
         replyData
       );
-      console.log("✅ Reply added successfully!");
       return response.data;
     } catch (error) {
       console.error(
-        `❌ Error adding reply to comment ${commentId}:`,
+        `Error adding reply to comment ${commentId}:`,
         error.message
       );
       return {
@@ -229,7 +212,6 @@ export class CommentService {
   // Get all comments with replies (convenience method)
   static async getCommentsWithReplies(postId, options = {}) {
     try {
-      console.log(`🔄 Fetching comments with replies for post ${postId}...`);
       const response = await this.getPostComments(postId, {
         ...options,
         includeReplies: true,
@@ -237,7 +219,7 @@ export class CommentService {
       return response;
     } catch (error) {
       console.error(
-        `❌ Error fetching comments with replies for post ${postId}:`,
+        `Error fetching comments with replies for post ${postId}:`,
         error.message
       );
       return {
@@ -252,7 +234,6 @@ export class CommentService {
   // Get popular comments for a post (most liked)
   static async getPopularComments(postId, limit = 10) {
     try {
-      console.log(`🔄 Fetching popular comments for post ${postId}...`);
       const response = await this.getPostComments(postId, {
         sort: "popular",
         limit,
@@ -260,7 +241,7 @@ export class CommentService {
       return response;
     } catch (error) {
       console.error(
-        `❌ Error fetching popular comments for post ${postId}:`,
+        `Error fetching popular comments for post ${postId}:`,
         error.message
       );
       return {

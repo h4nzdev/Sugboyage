@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SocialFeedMobile from "../../Mobile/SocialFeedMobile";
 import SocialFeedDesktop from "../../Desktop/SocialFeedDesktop";
 import { usePosts } from "../../../hooks/usePost";
+import AuthenticationService from "../../../services/authenticationService";
 
 export default function SocialFeed() {
   const [activeFilter, setActiveFilter] = useState("all");
+  const [users, setUsers] = useState([]);
 
   // Use the posts hook - simple!
   const { posts, loading, error, likePost, fetchPosts } = usePosts();
@@ -16,6 +18,19 @@ export default function SocialFeed() {
   const handleLike = async (postId) => {
     await likePost(postId);
   };
+
+  const fetchUsers = async () => {
+    try {
+      const response = await AuthenticationService.getAllUsers();
+      setUsers(response);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   // Simple filtering
   const filteredPosts = posts.filter((post) => {
@@ -44,6 +59,7 @@ export default function SocialFeed() {
           onRefresh={handleRefresh}
           onLike={handleLike}
           onAddPost={() => console.log("Navigate to add post")}
+          users={users}
         />
       </div>
 
@@ -58,6 +74,7 @@ export default function SocialFeed() {
           onRefresh={handleRefresh}
           onLike={handleLike}
           onAddPost={() => console.log("Navigate to add post")}
+          users={users}
         />
       </div>
     </>

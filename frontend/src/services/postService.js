@@ -4,18 +4,31 @@ const API_BASE_URL = "http://localhost:3000/api";
 
 export class PostService {
   // Create a new post
-  static async createPost(postData) {
+  static async createPost(formData) {
     try {
-      console.log("🔄 Creating new post...");
-      const response = await axios.post(`${API_BASE_URL}/posts`, postData);
+      console.log("🔄 Creating new post with images...");
+
+      // Log what we're sending for debugging
+      console.log("📦 FormData contents:");
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": ", pair[1]);
+      }
+
+      const response = await axios.post(`${API_BASE_URL}/posts`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       console.log("✅ Post created successfully!");
       return response.data;
     } catch (error) {
-      console.error("❌ Error creating post:", error.message);
+      console.error("❌ Error creating post:", error);
+      console.error("📋 Error details:", error.response?.data);
       return {
         success: false,
         message: error.response?.data?.message || "Failed to create post",
         error: error.message,
+        status: error.response?.status,
       };
     }
   }
@@ -89,10 +102,13 @@ export class PostService {
   }
 
   // Like a post
-  static async likePost(postId) {
+  static async likePost(postId, data) {
     try {
       console.log(`🔄 Liking post ${postId}...`);
-      const response = await axios.post(`${API_BASE_URL}/posts/${postId}/like`);
+      const response = await axios.post(
+        `${API_BASE_URL}/posts/${postId}/like`,
+        data
+      );
       console.log("✅ Post liked successfully!");
       return response.data;
     } catch (error) {

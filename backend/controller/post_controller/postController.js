@@ -1,11 +1,13 @@
+import cloudinary from "../../config/cloudinaryConfig.js";
 import Post from "../../model/Post_Model/postModel.js";
 
 export const PostController = {
   // Create a new post
   async createPost(req, res) {
     try {
-      const { author, content, location, category, tags, visibility, media } =
+      const { author, content, location, category, tags, visibility } =
         req.body;
+      const images = req.files;
 
       // Simple validation
       if (!author || !content || !location?.name) {
@@ -13,6 +15,24 @@ export const PostController = {
           success: false,
           message: "Author, content, and location name are required",
         });
+      }
+
+      // Upload images to Cloudinary if any
+      let imageUrls = [];
+      if (images && images.length > 0) {
+        for (const image of images) {
+          const result = await cloudinary.uploader.upload(
+            `data:${image.mimetype};base64,${image.buffer.toString("base64")}`,
+            {
+              folder: "community-posts",
+            }
+          );
+          imageUrls.push({
+            url: result.secure_url,
+            caption: "", // You can add caption logic if needed
+            position: imageUrls.length,
+          });
+        }
       }
 
       const post = new Post({
@@ -34,7 +54,10 @@ export const PostController = {
         category: category || "other",
         tags: tags || [],
         visibility: visibility || "public",
-        media: media || { images: [], videos: [] },
+        media: {
+          images: imageUrls,
+          videos: [], // Add video logic if needed
+        },
       });
 
       const savedPost = await post.save();
@@ -58,6 +81,7 @@ export const PostController = {
     try {
       const posts = await Post.find({ isActive: true })
         .populate("author", "username profile.displayName profile.avatar")
+        .populate("engagement.likedBy", "username")
         .sort({ createdAt: -1 })
         .limit(20); // Simple limit instead of pagination
 
@@ -180,6 +204,7 @@ export const PostController = {
   // Like a post
   async likePost(req, res) {
     try {
+      const { userId } = req.body;
       const post = await Post.findById(req.params.id);
 
       if (!post) {
@@ -188,14 +213,22 @@ export const PostController = {
           message: "Post not found",
         });
       }
+      const alreadyLiked = post.engagement.likedBy.includes(userId);
+      if (alreadyLiked) {
+        post.engagement.likedBy.pull(userId);
+        post.engagement.likes = Math.max(0, post.engagement.likes - 1);
+      } else {
+        post.engagement.likedBy.push(userId);
+        post.engagement.likes += 1;
+      }
 
-      post.engagement.likes += 1;
       await post.save();
 
       res.json({
         success: true,
-        message: "Post liked",
+        message: alreadyLiked ? "Post unliked" : "Post liked",
         likes: post.engagement.likes,
+        isLiked: !alreadyLiked,
       });
     } catch (error) {
       res.status(500).json({
@@ -214,6 +247,7 @@ export const PostController = {
         isActive: true,
       })
         .populate("author", "username profile.displayName profile.avatar")
+        .populate("engagement.likedBy", "username")
         .sort({ createdAt: -1 });
 
       res.json({

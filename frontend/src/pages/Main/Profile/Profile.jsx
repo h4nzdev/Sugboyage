@@ -77,7 +77,7 @@ export default function Profile() {
   // Load posts from PostService
   const loadPosts = async () => {
     try {
-      const result = await PostService.getAllPosts();
+      const result = await PostService.getUserPosts(authUser.id);
       if (result.success && result.posts) {
         setPosts(result.posts);
       } else {

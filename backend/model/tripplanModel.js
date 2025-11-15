@@ -8,11 +8,11 @@ const activitySchema = new mongoose.Schema({
     trim: true,
   },
   time: {
-    type: String, // "9:00 AM", "Afternoon", "Evening"
+    type: String,
     required: true,
   },
   duration: {
-    type: String, // "1 hour", "2 hours", "30 mins"
+    type: String,
     required: true,
   },
   location: {
@@ -23,7 +23,7 @@ const activitySchema = new mongoose.Schema({
     },
   },
   cost: {
-    type: String, // "Free", "₱100", "₱500-₱1000"
+    type: String,
     default: "Free",
   },
   description: String,
@@ -48,7 +48,7 @@ const activitySchema = new mongoose.Schema({
   },
   notes: String,
   transportToNext: {
-    mode: String, // "Jeepney", "Taxi", "Walk", "Grab"
+    mode: String,
     duration: String,
     cost: String,
   },
@@ -59,8 +59,8 @@ const daySchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  date: String, // Optional: "Dec 15, 2024"
-  theme: String, // "City Heritage Day", "Beach Adventure"
+  date: String,
+  theme: String,
   activities: [activitySchema],
   totalCost: String,
   notes: String,
@@ -89,7 +89,7 @@ const tripPlanSchema = new mongoose.Schema(
       },
     },
     budget: {
-      total: String, // "₱5,000"
+      total: String,
       currency: {
         type: String,
         default: "₱",
@@ -163,8 +163,8 @@ const tripPlanSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-    aiPrompt: String, // Original user request
-    aiModel: String, // "gemini-2.0-flash"
+    aiPrompt: String,
+    aiModel: String,
 
     // Status & Metadata
     status: {

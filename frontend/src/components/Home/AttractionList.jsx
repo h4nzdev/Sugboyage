@@ -1,6 +1,7 @@
 import React from "react";
 import { MapPin, Star } from "lucide-react";
 import SectionHeader from "./SectionHeader";
+import { useNavigate } from "react-router-dom";
 
 // Error Boundary Component
 class AttractionErrorBoundary extends React.Component {
@@ -45,6 +46,7 @@ class AttractionErrorBoundary extends React.Component {
 const AttractionList = ({ spots = [], userLocation = null, radius = null }) => {
   // Safe spots array check
   const safeSpots = Array.isArray(spots) ? spots.filter((s) => s) : [];
+  const navigate = useNavigate();
 
   // Filter spots within radius if user location and radius are provided
   const { filteredSpots, hasNoSpotNearby } = (() => {
@@ -133,6 +135,7 @@ const AttractionList = ({ spots = [], userLocation = null, radius = null }) => {
 
             return (
               <div
+                onClick={() => navigate(`/main/detailed-info/${spot._id}`)}
                 key={safeId}
                 className="flex-shrink-0 w-72 bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow border border-gray-100 cursor-pointer active:scale-95 transition-transform"
               >

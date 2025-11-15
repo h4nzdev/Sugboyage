@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  scroll-behavior: smooth;
+}
+
 /* Custom scrollbar hide */
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -33,4 +37,3 @@
 .leaflet-control-zoom-out {
   display: none !important;
 }
-

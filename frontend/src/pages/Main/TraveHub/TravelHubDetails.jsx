@@ -12,17 +12,22 @@ import {
   AlertCircle,
   CheckCircle,
   Circle,
+  Plus,
 } from "lucide-react";
 import { TripPlanService } from "../../../services/tripPlanService";
 import EditTripModal from "./EditTripModal"; // Import the edit modal
 import { useReminder } from "../../../context/ReminderContext";
+import CreateTripModal from "./CreateTripModal";
 
 export default function TripDetails() {
   const [trip, setTrip] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeDay, setActiveDay] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [updatingActivity, setUpdatingActivity] = useState(null); // Track which activity is being updated
+  const [updatingActivity, setUpdatingActivity] = useState(null);
+
+  const [isCreateModal, setIsCreateModal] = useState(false);
+
   const navigate = useParams();
   const { tripId } = useParams();
   const { monitorTrip } = useReminder();
@@ -156,45 +161,6 @@ export default function TripDetails() {
     }
   };
 
-  // Quick toggle function for immediate UI feedback
-  const handleQuickToggle = (dayIndex, activityIndex) => {
-    const activity = trip.days[dayIndex].activities[activityIndex];
-    const activityId = `${dayIndex}-${activityIndex}`;
-
-    // Optimistically update UI
-    setTrip((prevTrip) => {
-      const newDays = [...prevTrip.days];
-      newDays[dayIndex].activities[activityIndex].isCompleted =
-        !activity.isCompleted;
-
-      // Recalculate progress
-      const totalActivities = newDays.reduce(
-        (total, day) => total + day.activities.length,
-        0
-      );
-      const completedActivities = newDays.reduce(
-        (total, day) =>
-          total + day.activities.filter((act) => act.isCompleted).length,
-        0
-      );
-
-      return {
-        ...prevTrip,
-        days: newDays,
-        progress: {
-          plannedActivities: totalActivities,
-          completedActivities: completedActivities,
-          completionPercentage: Math.round(
-            (completedActivities / totalActivities) * 100
-          ),
-        },
-      };
-    });
-
-    // Then call the API
-    handleToggleActivity(dayIndex, activityIndex);
-  };
-
   const formatTime = (timeString) => {
     if (!timeString) return "Flexible time";
     return timeString;
@@ -310,12 +276,20 @@ export default function TripDetails() {
               </p>
             </div>
           </div>
-          <button
-            onClick={loadTripDetails}
-            className="p-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
-          >
-            <RefreshCw size={20} className="text-gray-700" />
-          </button>
+          <div className="flex items-center space-x-6">
+            <button
+              onClick={loadTripDetails}
+              className="p-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors"
+            >
+              <RefreshCw size={20} className="text-gray-700" />
+            </button>
+            <button
+              onClick={() => setIsCreateModal(true)}
+              className="p-2 bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
+            >
+              <Plus size={20} className="text-white" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -489,7 +463,7 @@ export default function TripDetails() {
                             <div className="flex items-start gap-3 flex-1">
                               <button
                                 onClick={() =>
-                                  handleQuickToggle(activeDay, index)
+                                  handleToggleActivity(activeDay, index)
                                 }
                                 disabled={isUpdating}
                                 className={`flex-shrink-0 mt-1 transition-all ${
@@ -629,6 +603,12 @@ export default function TripDetails() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         onSave={handleSaveTrip}
+      />
+
+      {/* Create Trip Modal */}
+      <CreateTripModal
+        isOpen={isCreateModal}
+        onClose={() => setIsCreateModal(false)}
       />
     </div>
   );

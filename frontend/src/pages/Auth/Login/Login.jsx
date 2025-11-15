@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthenticationContext } from "../../../context/AuthenticationContext";
+import logo from "../../../assets/logo.png";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -88,12 +89,6 @@ const Login = () => {
     }
   };
 
-  const handleDemoLogin = () => {
-    setEmail("demo@example.com");
-    setPassword("demo123");
-    setTimeout(() => document.querySelector("form").requestSubmit(), 500);
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
       <div
@@ -115,9 +110,10 @@ const Login = () => {
                 </button>
 
                 <div className="mb-8">
-                  <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg mb-6 backdrop-blur-sm">
-                    <span className="text-white font-bold text-2xl">🌴</span>
-                  </div>
+                  <div
+                    className="w-20 h-20 bg-white/20 rounded-2xl bg-cover bg-center mb-2"
+                    style={{ backgroundImage: `url(${logo})` }}
+                  />
                   <h1 className="text-4xl font-black mb-4">
                     Discover Cebu's Hidden Gems
                   </h1>
@@ -420,30 +416,6 @@ const Login = () => {
                 </button>
               </Link>
             </div>
-
-            {/* Demo Hint */}
-            <div className="bg-red-50 rounded-2xl p-4 border border-red-200">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <Info size={16} className="text-red-600" />
-                  <span className="text-red-700 font-semibold text-sm ml-2">
-                    Demo Access
-                  </span>
-                </div>
-                <button
-                  onClick={handleDemoLogin}
-                  disabled={loading}
-                  className="text-red-600 hover:text-red-700 text-xs font-semibold underline"
-                >
-                  Try Demo
-                </button>
-              </div>
-              <p className="text-red-600 text-xs">
-                Use any valid email format and password with at least 6
-                characters to login
-              </p>
-            </div>
-
             {/* Footer - Mobile Only */}
             <div className="lg:hidden mt-8 pt-6 border-t border-gray-200">
               <div className="flex flex-col items-center space-y-3">

@@ -11,6 +11,7 @@ import Map from "../../pages/Main/Map/Map";
 import DetailedInfo from "../../pages/Main/DetailedInfo/DetailedInfo";
 import CreatePost from "../../pages/Main/SocialFeed/CreatePost";
 import TravelHubDetails from "../../pages/Main/TraveHub/TravelHubDetails";
+import UserProfileView from "../../pages/Main/Profile/UserProfilePreview";
 
 const MainRoutes = () => {
   return (
@@ -52,6 +53,14 @@ const MainRoutes = () => {
         element={
           <MainLayout>
             <Profile />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/main/profile/:userId"
+        element={
+          <MainLayout>
+            <UserProfileView />
           </MainLayout>
         }
       />

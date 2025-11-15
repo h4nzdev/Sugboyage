@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Search, Bell, User } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AuthenticationContext } from "../../context/AuthenticationContext";
 
 const MainHeader = () => {
+  const { user } = useContext(AuthenticationContext);
   return (
     <div className="flex items-center justify-between px-4 py-4 bg-white shadow-sm">
       {/* Logo */}
@@ -11,7 +13,7 @@ const MainHeader = () => {
           <span className="text-white font-bold text-sm">C</span>
         </div>
         <span className="ml-2 text-xl font-bold text-gray-900">
-          CebuExplorer
+          {user?.username}
         </span>
       </div>
 

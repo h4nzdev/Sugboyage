@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import {
   Heart,
   MessageCircle,
@@ -15,7 +15,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import CommentModal from "../../components/SocialFeed/CommentModal";
 import { AuthenticationContext } from "../../context/AuthenticationContext";
-import { PostService } from "../../services/postService";
+import { PostService } from "../../services/PostService";
 
 const SocialFeedMobile = ({
   posts,
@@ -36,6 +36,23 @@ const SocialFeedMobile = ({
     primary: "#DC143C",
     primaryLight: "#FEE2E2",
   };
+
+  // Initialize liked posts from backend data
+  useEffect(() => {
+    const initialLikedState = {};
+    posts.forEach((post) => {
+      const userLikedThisPost = post.engagement?.likedBy?.some(
+        (likedUser) => likedUser._id === user?.id
+      );
+
+      if (userLikedThisPost) {
+        initialLikedState[post._id] = true;
+      }
+    });
+
+    console.log("🔄 Mobile: Initializing likedPosts:", initialLikedState);
+    setLikedPosts(initialLikedState);
+  }, [posts, user?.id]);
 
   const filters = [
     { id: "all", label: "All Posts" },
@@ -59,15 +76,26 @@ const SocialFeedMobile = ({
     return date.toLocaleDateString();
   };
 
+  // Updated handleLike function
   const handleLike = async (postId) => {
     try {
       setLikedPosts((prev) => ({
         ...prev,
         [postId]: !prev[postId],
       }));
-      const response = await PostService.likePost(postId);
+
+      const response = await PostService.likePost(postId, { userId: user.id });
+
+      if (!response.success) {
+        // Revert if failed
+        setLikedPosts((prev) => ({
+          ...prev,
+          [postId]: !prev[postId],
+        }));
+      }
     } catch (error) {
       console.error("Error liking post:", error);
+      // Revert on error
       setLikedPosts((prev) => ({
         ...prev,
         [postId]: !prev[postId],
@@ -137,7 +165,7 @@ const SocialFeedMobile = ({
     const commentText = commentInputs[post._id] || "";
 
     return (
-      <div className="bg-white rounded-2xl p-4 mb-4 border border-gray-200">
+      <div className="bg-white p-4 mb-4 border border-gray-200">
         {/* Header */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center">
@@ -148,7 +176,10 @@ const SocialFeedMobile = ({
               {getUserAvatar(post)}
             </div>
             <div>
-              <div className="font-bold text-gray-900 text-sm">
+              <div
+                onClick={() => navigate(`/main/profile/${post.author._id}`)}
+                className="font-bold text-gray-900 text-sm"
+              >
                 {getDisplayName(post)}
               </div>
               <div className="flex items-center text-gray-500 text-xs">
@@ -192,21 +223,61 @@ const SocialFeedMobile = ({
         {/* Content */}
         <p className="text-gray-800 text-sm leading-5 mb-3">{post.content}</p>
 
-        {/* Image/Media */}
-        {hasMedia(post) ? (
-          <div className="h-48 bg-gray-100 rounded-xl mb-3 flex flex-col items-center justify-center">
-            <span className="text-4xl mb-2">🖼️</span>
-            <span className="text-gray-500 text-sm">
-              {post.media.images.length} photo
-              {post.media.images.length > 1 ? "s" : ""}
-            </span>
-          </div>
-        ) : (
-          <div className="h-32 bg-gray-50 rounded-xl mb-3 flex flex-col items-center justify-center">
-            <span className="text-lg mb-2 text-gray-500">
-              No image to display
-            </span>
-            <Camera className="w-6 h-6 text-gray-400" />
+        {/* Image/Media - Updated to match desktop style */}
+        {hasMedia(post) && (
+          <div className="mb-3 rounded-xl overflow-hidden">
+            {post.media.images.length === 1 ? (
+              // Single image - full width with proper aspect ratio
+              <div className="w-full">
+                <img
+                  src={post.media.images[0].url}
+                  alt={post.media.images[0].caption || "Post image"}
+                  className="w-full h-48 object-contain bg-gray-50"
+                />
+              </div>
+            ) : post.media.images.length === 2 ? (
+              // Two images - side by side
+              <div className="flex h-48">
+                <img
+                  src={post.media.images[0].url}
+                  alt={post.media.images[0].caption || "Post image 1"}
+                  className="w-1/2 h-full object-cover border-r border-gray-200"
+                />
+                <img
+                  src={post.media.images[1].url}
+                  alt={post.media.images[1].caption || "Post image 2"}
+                  className="w-1/2 h-full object-cover"
+                />
+              </div>
+            ) : post.media.images.length >= 3 ? (
+              // Three or more images - grid layout
+              <div className="grid grid-cols-2 gap-1 h-48">
+                <img
+                  src={post.media.images[0].url}
+                  alt={post.media.images[0].caption || "Post image 1"}
+                  className="col-span-2 h-24 object-cover"
+                />
+                <img
+                  src={post.media.images[1].url}
+                  alt={post.media.images[1].caption || "Post image 2"}
+                  className="h-24 object-cover"
+                />
+                <div className="relative h-24">
+                  <img
+                    src={post.media.images[2].url}
+                    alt={post.media.images[2].caption || "Post image 3"}
+                    className="w-full h-full object-cover"
+                  />
+                  {post.media.images.length > 3 && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <span className="text-white font-bold text-sm">
+                        +{post.media.images.length - 3}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -240,7 +311,7 @@ const SocialFeedMobile = ({
                   isLiked ? "text-red-600 font-semibold" : "text-gray-500"
                 }`}
               >
-                {(post.engagement?.likes || 0) + (isLiked ? 1 : 0)}
+                {post.engagement?.likes || 0}
               </span>
             </button>
 
@@ -351,7 +422,7 @@ const SocialFeedMobile = ({
 
       {/* Create Post Prompt */}
       <div
-        className="bg-white rounded-xl border border-gray-200 p-4 mx-4 my-4 cursor-pointer hover:border-red-200 transition-colors"
+        className="bg-white border border-gray-200 p-4 my-4 cursor-pointer hover:border-red-200 transition-colors"
         onClick={onAddPost}
       >
         <div className="flex items-center gap-3">
@@ -380,7 +451,7 @@ const SocialFeedMobile = ({
         )}
 
         {/* Posts */}
-        <div className="mt-2 px-4">
+        <div className="mt-2">
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post) => <PostCard key={post._id} post={post} />)
           ) : !loading ? (

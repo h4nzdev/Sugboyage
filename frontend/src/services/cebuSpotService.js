@@ -5,10 +5,7 @@ const API_BASE_URL = "http://localhost:3000/api";
 export class CebuSpotsService {
   static async getAllCebuSpots() {
     try {
-      console.log("🔄 Fetching spots from database...");
       const response = await axios.get(`${API_BASE_URL}/spots`);
-      console.log("✅ Spots fetched successfully!");
-      // Return data array from response
       return response.data.data || response.data || [];
     } catch (error) {
       console.error("❌ Error fetching spots:", error.message);
@@ -19,12 +16,10 @@ export class CebuSpotsService {
   // Get spot by ID directly from API
   static async getSpotByIdFromAPI(id) {
     try {
-      console.log(`🔄 Fetching spot with ID: ${id} from API...`);
       const response = await axios.get(`${API_BASE_URL}/spots/${id}`);
-      console.log("✅ Spot fetched successfully from API!");
       return response.data.data || response.data || null;
     } catch (error) {
-      console.error(`❌ Error fetching spot with ID ${id}:`, error.message);
+      console.error(`Error fetching spot with ID ${id}:`, error.message);
       return null;
     }
   }
@@ -35,7 +30,6 @@ export class CebuSpotsService {
       const allSpots = await this.getAllCebuSpots();
 
       if (!Array.isArray(allSpots)) {
-        console.warn("⚠️ AllSpots is not an array:", allSpots);
         return [];
       }
 
@@ -75,15 +69,12 @@ export class CebuSpotsService {
       if (!category || category === "all") {
         return await this.getAllCebuSpots();
       }
-
-      console.log(`🔄 Fetching spots by category: ${category}...`);
       const response = await axios.get(
         `${API_BASE_URL}/spots/category/${category}`
       );
-      console.log("✅ Category spots fetched successfully!");
       return response.data.data || response.data || [];
     } catch (error) {
-      console.error(`❌ Error fetching category ${category}:`, error.message);
+      console.error(`Error fetching category ${category}:`, error.message);
       // Fallback to client-side filtering
       console.log("🔄 Falling back to client-side filtering...");
       const allSpots = await this.getAllCebuSpots();
@@ -101,7 +92,7 @@ export class CebuSpotsService {
         allSpots.find((spot) => spot?._id === id || spot?.id === id) || null
       );
     } catch (error) {
-      console.error("❌ Error finding spot:", error);
+      console.error("Error finding spot:", error);
       return null;
     }
   }
@@ -109,14 +100,12 @@ export class CebuSpotsService {
   // Get featured spots
   static async getFeaturedSpots(limit = 6) {
     try {
-      console.log("🔄 Fetching featured spots...");
       const response = await axios.get(
         `${API_BASE_URL}/spots/featured?limit=${limit}`
       );
-      console.log("✅ Featured spots fetched successfully!");
       return response.data.data || response.data || [];
     } catch (error) {
-      console.error("❌ Error fetching featured spots:", error.message);
+      console.error("Error fetching featured spots:", error.message);
       // Fallback to client-side filtering
       const allSpots = await this.getAllCebuSpots();
       return allSpots.filter((spot) => spot?.featured).slice(0, limit);
@@ -144,7 +133,7 @@ export class CebuSpotsService {
         return distance <= radius;
       });
     } catch (error) {
-      console.error("❌ Error fetching nearby spots:", error);
+      console.error("Error fetching nearby spots:", error);
       return [];
     }
   }

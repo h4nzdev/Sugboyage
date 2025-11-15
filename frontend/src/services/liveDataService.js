@@ -1,5 +1,8 @@
 import axios from "axios";
 
+const OPENWEATHER_API_KEY = "dbfcf35df441ec5b7911161ff7620fc0";
+const OPENROUTE_API_KEY =
+  "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjQ1N2I3YTYyYzZiMTRjZTc5MjI5OTdhNWI3NTIzY2I1IiwiaCI6Im11cm11cjY0In0="; // From your setup
 
 export const LiveDataService = {
   // 🎯 WEATHER DATA

@@ -154,7 +154,7 @@ const DiscoverDesktop = ({
             </div>
             <button
               onClick={() => navigate(`/main/detailed-info/${destination._id}`)}
-              className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-colors"
+              className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-colors cursor-pointer"
             >
               <ArrowRight className="w-4 h-4" />
             </button>

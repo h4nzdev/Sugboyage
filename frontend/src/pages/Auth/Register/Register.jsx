@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthenticationService } from "../../../services/authenticationService";
+import logo from "../../../assets/logo.png";
 
 // Memoized InputField component
 const InputField = React.memo(
@@ -134,7 +135,7 @@ export default function Register() {
 
     // Check if user is already logged in
     if (AuthenticationService.isUserLoggedIn()) {
-      navigate("/dashboard");
+      navigate(-1);
     }
   }, [currentStep, navigate]);
 
@@ -269,51 +270,45 @@ export default function Register() {
     setSuccess(false);
 
     try {
-      // Use the AuthenticationService for registration
-      const result = await AuthenticationService.register({
+      // Prepare user data for verification
+      const userData = {
         username: formData.username.trim(),
         email: formData.email.trim(),
         password: formData.password,
         displayName: formData.displayName.trim(),
-      });
+      };
 
-      if (result.success) {
-        // Save user to localStorage
-        AuthenticationService.saveUserToLocalStorage(result.user);
+      console.log("📧 Sending verification code to:", userData.email);
 
-        console.log("✅ Registration successful", result.user);
+      // Send verification code first
+      const verificationResult =
+        await AuthenticationService.sendVerificationCode(userData.email);
+
+      if (verificationResult.success) {
+        console.log("✅ Verification code sent successfully");
         setSuccess(true);
-        setError("🎉 Registration successful! Redirecting...");
+        setError("📧 Verification code sent! Redirecting...");
 
-        // Redirect to dashboard after successful registration
+        // Redirect to email verification with the user data
         setTimeout(() => {
-          navigate("/dashboard");
-        }, 2000);
+          navigate("/auth/verify-email", {
+            state: {
+              email: formData.email,
+              userData: userData, // Send the data to be registered AFTER verification
+            },
+          });
+        }, 1500);
       } else {
-        throw new Error(result.message || "Registration failed");
+        setError(
+          verificationResult.message || "Failed to send verification code"
+        );
       }
     } catch (err) {
-      setError(err.message);
-      console.error("❌ Registration error:", err);
+      setError(err.message || "Failed to send verification code");
+      console.error("❌ Verification error:", err);
     } finally {
       setLoading(false);
     }
-  };
-
-  // Demo registration for testing
-  const handleDemoRegister = () => {
-    setFormData({
-      username: "demo_user",
-      email: "demo@example.com",
-      password: "demo123",
-      confirmPassword: "demo123",
-      displayName: "Demo User",
-    });
-
-    // Auto-advance to step 3 after a short delay
-    setTimeout(() => {
-      setCurrentStep(3);
-    }, 500);
   };
 
   const ProgressBar = () => (
@@ -375,7 +370,7 @@ export default function Register() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
       <div
         className={`w-full max-w-6xl transition-all duration-700 ease-out ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
@@ -404,9 +399,10 @@ export default function Register() {
                 </button>
 
                 <div className="mb-8">
-                  <div className="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center shadow-lg mb-6 backdrop-blur-sm">
-                    <span className="text-white font-bold text-2xl">🌊</span>
-                  </div>
+                  <div
+                    className="w-20 h-20 bg-white/20 rounded-2xl bg-cover bg-center mb-2"
+                    style={{ backgroundImage: `url(${logo})` }}
+                  />
                   <h1 className="text-4xl font-black mb-4">
                     Start Your Cebu Journey
                   </h1>
@@ -481,7 +477,7 @@ export default function Register() {
                       )}
                     </div>
                     <span className="text-red-100 text-sm">
-                      Start exploring Cebu
+                      Verify email & start exploring
                     </span>
                   </div>
                 </div>
@@ -606,27 +602,6 @@ export default function Register() {
                     autoCapitalize="none"
                     keyboardType="email"
                   />
-
-                  <div className="bg-red-50 rounded-2xl p-4 border border-red-200 mt-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center">
-                        <Info size={16} className="text-red-600" />
-                        <span className="text-red-800 font-semibold text-sm ml-2">
-                          Quick & Easy
-                        </span>
-                      </div>
-                      <button
-                        onClick={handleDemoRegister}
-                        disabled={loading}
-                        className="text-red-600 hover:text-red-700 text-xs font-semibold underline"
-                      >
-                        Try Demo
-                      </button>
-                    </div>
-                    <p className="text-red-600 text-xs">
-                      This will be your unique identity in our travel community
-                    </p>
-                  </div>
                 </div>
               )}
 
@@ -706,7 +681,7 @@ export default function Register() {
                       </span>
                     </div>
                     <p className="text-green-600 text-xs">
-                      Review your information and complete registration to start
+                      Complete registration to verify your email and start
                       exploring Cebu
                     </p>
                   </div>
@@ -790,14 +765,14 @@ export default function Register() {
                             className="text-white animate-spin"
                           />
                           <span className="text-white font-bold text-base ml-2">
-                            Creating Account...
+                            Sending Code...
                           </span>
                         </>
                       ) : (
                         <>
-                          <UserPlus size={20} className="text-white" />
+                          <Mail size={20} className="text-white" />
                           <span className="text-white font-bold text-base ml-2">
-                            Complete Registration
+                            Send Verification Code
                           </span>
                         </>
                       )}
