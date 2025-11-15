@@ -2,7 +2,7 @@
 import axios from "axios";
 import Config from "../config/api";
 
-const API_BASE_URL = Config.API_BASE_URL;
+const API_BASE_URL = `${Config.API_BASE_URL}/api`;
 
 export class TripPlanService {
   // 🎯 Save AI-generated trip plan

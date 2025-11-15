@@ -1,6 +1,7 @@
 import axios from "axios";
+import Config from "../config/api";
 
-const API_BASE_URL = "http://localhost:3000/api";
+const API_BASE_URL = `${Config.API_BASE_URL}/api`;
 
 export class CebuSpotsService {
   static async getAllCebuSpots() {

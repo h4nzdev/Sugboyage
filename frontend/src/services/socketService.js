@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
+import Config from "../config/api";
 
-const SOCKET_URL = "http://localhost:3000";
+const SOCKET_URL = Config.API_BASE_URL;
 
 class SocketService {
   constructor() {
